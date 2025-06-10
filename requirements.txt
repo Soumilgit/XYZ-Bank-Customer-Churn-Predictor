@@ -1,0 +1,7 @@
+xgboost
+watchdog
+streamlit
+scikit-learn
+python-dotenv
+plotly
+openai
