@@ -41,27 +41,66 @@ def main():
     voting_classifier_model = load_model('models/voting_clf.pkl')
     xgboost_SMOTE_model = load_model('models/xgboost-SMOTE.pkl')
     xgboost_featureEngineered_model = load_model('models/xgboost-featureEngineered.pkl')
+    # After loading models
+    print("XGBoost SMOTE model features:", xgboost_SMOTE_model.get_booster().feature_names)
+    print("XGBoost Feature Engineered model features:", xgboost_featureEngineered_model.get_booster().feature_names) 
 
     def prepare_input(credit_score, location, gender, age, tenure, balance,
-                    num_of_products, has_credit_card, is_active_member,
-                    estimated_salary):
+                num_of_products, has_credit_card, is_active_member,
+                estimated_salary):
+        tenure_age_ratio = tenure / age if age != 0 else 0
+        clv = (balance * tenure) / (age + 1)
+    
+    # Age groups
+        age_group_middleage = 1 if 30 <= age < 50 else 0
+        age_group_senior = 1 if 50 <= age < 65 else 0
+        age_group_elderly = 1 if age >= 65 else 0
+
+    # Create dictionary with all possible features
         input_dict = {
-            'CreditScore': credit_score,
-            'Age': age,
-            'Tenure': tenure,
-            'Balance': balance,
-            'NumOfProducts': num_of_products,
-            'HasCrCard': int(has_credit_card),
-            'IsActiveMember': int(is_active_member),
-            'EstimatedSalary': estimated_salary,
-            'Geography_Japan': 1 if location == "Japan" else 0,
-            'Geography_USA': 1 if location == "USA" else 0,
-            'Geography_Australia': 1 if location == "Australia" else 0,
-            'Gender_Male': 1 if gender == "Male" else 0,
-            'Gender_Female': 1 if gender == "Female" else 0
+        'CreditScore': credit_score,
+        'Age': age,
+        'Tenure': tenure,
+        'Balance': balance,
+        'NumOfProducts': num_of_products,
+        'HasCrCard': int(has_credit_card),
+        'IsActiveMember': int(is_active_member),
+        'EstimatedSalary': estimated_salary,
+        'Geography_Japan': 1 if location == "Japan" else 0,
+        'Geography_USA': 1 if location == "USA" else 0,
+        'Geography_Australia': 1 if location == "Australia" else 0,
+        'Gender_Male': 1 if gender == "Male" else 0,
+        'Gender_Female': 1 if gender == "Female" else 0,
+        'CLV': clv,
+        'TenureAgeRatio': tenure_age_ratio,
+        'AgeGroup_Middleage': age_group_middleage,
+        'AgeGroup_Senior': age_group_senior,
+        'AgeGroup_Elderly': age_group_elderly,
         }
-        input_df = pd.DataFrame([input_dict])
-        return input_df, input_dict
+    
+    # Get the exact feature order from the model
+        smote_features = xgboost_SMOTE_model.get_booster().feature_names
+        engineered_features = xgboost_featureEngineered_model.get_booster().feature_names
+    
+    # Create DataFrames with exact feature orders
+        input_df_smote = pd.DataFrame([input_dict])[smote_features]
+        input_df_engineered = pd.DataFrame([input_dict])[engineered_features]
+    
+    # For basic models, use just the core features
+        basic_features = [
+        'CreditScore', 'Age', 'Tenure', 'Balance', 'NumOfProducts',
+        'HasCrCard', 'IsActiveMember', 'EstimatedSalary',
+        'Geography_Japan', 'Geography_USA', 'Geography_Australia',
+        'Gender_Male', 'Gender_Female'
+        ]
+        input_df_basic = pd.DataFrame([input_dict])[basic_features]
+    
+        return {
+        'basic': input_df_basic,
+        'smote': input_df_smote,
+        'engineered': input_df_engineered,
+        'dict': input_dict
+        }
 
     def calculate_percentiles(df, input_dict):
         percentiles = {}
@@ -71,29 +110,34 @@ def main():
                 percentiles[feature] = percentileofscore(df[feature], value, kind='mean')
         return percentiles
 
-    def make_predictions(input_df, input_dict, customer_percentiles):
+    def make_predictions(input_dfs, input_dict, customer_percentiles):
         probabilities = {
-            'XGBoost': xgboost_model.predict_proba(input_df)[0][1],
-            'Random Forest': random_forest_model.predict_proba(input_df)[0][1],
-            'K-Neareast Neighbors': knn_model.predict_proba(input_df)[0][1],
+        'XGBoost': xgboost_model.predict_proba(input_dfs['basic'])[0][1],
+        'Naive Bayes': naive_bayes_model.predict_proba(input_dfs['basic'])[0][1],
+        'Random Forest': random_forest_model.predict_proba(input_dfs['basic'])[0][1],
+        'Decision Tree': decision_tree_model.predict_proba(input_dfs['basic'])[0][1],
+        'SVM': svm_model.predict_proba(input_dfs['basic'])[0][1],
+        'K-Nearest Neighbors': knn_model.predict_proba(input_dfs['basic'])[0][1],
+        'XGBoost SMOTE': xgboost_SMOTE_model.predict_proba(input_dfs['smote'])[0][1],
+        'XGBoost Feature Engineered': xgboost_featureEngineered_model.predict_proba(input_dfs['engineered'])[0][1],
         }
-        
+    
+    # Rest of your function remains the same
         avg_probability = np.mean(list(probabilities.values()))
-
+    
         col1, col2 = st.columns(2)
-
         with col1:
             fig = ut.create_gauge_chart(avg_probability)
             st.plotly_chart(fig, use_container_width=True)
             st.write(f"The customer has a {avg_probability:.2%} probability of churning.")
-
+    
         with col2:
             fig_probs = ut.create_model_probability_chart(probabilities)
             st.plotly_chart(fig_probs, use_container_width=True)
-        
+    
         percentile_chart = ut.create_percentile_bar_chart(customer_percentiles)
         st.plotly_chart(percentile_chart, use_container_width=True)
-
+    
         return avg_probability
 
     def explain_prediction(probability, input_dict, surname):
@@ -236,22 +280,22 @@ def main():
                 min_value=0.0,
                 value=float(selected_customer["EstimatedSalary"]))
 
-        input_df, input_dict = prepare_input(credit_score, location, gender, age,
-                                           tenure, balance, min_products,
-                                           has_credit_card, is_active_member,
-                                           estimated_salary)
+            input_dfs_and_dict = prepare_input(credit_score, location, gender, age,
+                                     tenure, balance, min_products,
+                                     has_credit_card, is_active_member,
+                                     estimated_salary)
 
-        percentiles = calculate_percentiles(df, input_dict)
-        avg_probability = make_predictions(input_df, input_dict, percentiles)
+        percentiles = calculate_percentiles(df, input_dfs_and_dict['dict'])
+        avg_probability = make_predictions(input_dfs_and_dict, input_dfs_and_dict['dict'], percentiles)
 
-        explanation = explain_prediction(avg_probability, input_dict,
+        explanation = explain_prediction(avg_probability, input_dfs_and_dict['dict'],
                                        selected_customer["Surname"])
 
         st.markdown("---")
         st.markdown("## Explanation of Prediction")
         st.markdown(explanation)
 
-        email = generate_email(avg_probability, input_dict, explanation,
+        email = generate_email(avg_probability, input_dfs_and_dict['dict'], explanation,
                              selected_customer["Surname"])
 
         st.markdown("---")
