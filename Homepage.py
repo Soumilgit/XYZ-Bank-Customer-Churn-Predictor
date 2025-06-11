@@ -1,6 +1,7 @@
 # Homepage.py
 import streamlit as st
 import base64
+
 def add_header_image(image_file):
     with open(image_file, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode()
@@ -13,6 +14,7 @@ def add_header_image(image_file):
         """,
         unsafe_allow_html=True
     )
+
 def main():
     # Set page config
     st.set_page_config(
@@ -85,7 +87,6 @@ def main():
     )
     
     with st.container():
-        
         st.markdown("""
         <div style="text-align: center; margin-bottom: 2rem;">
             <h1>XYZ Bank</h1>
@@ -139,7 +140,6 @@ def main():
                     unsafe_allow_html=True
                 )
                 
-            
                 st.markdown(
                     """
                     <div class="feature-card">
@@ -151,7 +151,6 @@ def main():
                     """,
                     unsafe_allow_html=True
                 )
-        
         
         # Main CTA button
         if st.button("Launch Churn Prediction Tool", key="churn_button"):
@@ -186,10 +185,6 @@ if __name__ == "__main__":
     if st.session_state.page == "homepage":
         main()
     elif st.session_state.page == "churn_prediction":
-        # Import and run the churn prediction page directly
-        from main import df, selected_customer_option, selected_customer_id, selected_surname, selected_customer
-        from main import credit_score, location, gender, age, tenure, balance
-        from main import min_products, has_credit_card, is_active_member, estimated_salary
-        from main import input_df, input_dict, percentiles, avg_probability
-        from main import explanation, email
-        
+        # Import and run the churn prediction page
+        import main
+        main.main()
