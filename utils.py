@@ -62,8 +62,11 @@ def create_gauge_chart(probability):
     return fig
 
 def create_model_probability_chart(probabilities):
-    # Modern color gradient for models
-    colors = ["#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef"]
+    # Modern color gradient for models - ensure we have enough colors for all models
+    colors = ["#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", "#f97316", "#10b981"]
+    
+    # Create a list of models sorted by probability (optional)
+    sorted_models = sorted(probabilities.keys(), key=lambda x: probabilities[x], reverse=True)
     
     fig = go.Figure(data=[
         go.Bar(
@@ -73,7 +76,7 @@ def create_model_probability_chart(probabilities):
             text=[f'{p:.1%}' for p in probabilities.values()],
             textposition='auto',
             textfont={"color": "white"},
-            marker_color=colors[:len(probabilities)],
+            marker_color=colors[:len(probabilities)],  # Use as many colors as needed
             marker_line_color='rgba(255,255,255,0.3)',
             marker_line_width=1
         )
