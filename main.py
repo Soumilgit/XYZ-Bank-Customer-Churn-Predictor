@@ -151,7 +151,7 @@ def main():
     def generate_email(probability, input_dict, explanation, surname):
         prompt = f"""
         # CONTEXT #
-        You are a manager at HS Bank. You are responsible for ensuring customers stay with the bank and are incentivized with various offers.
+        You are a manager at XYZ Bank. You are responsible for ensuring customers stay with the bank and are incentivized with various offers.
         You noticed a customer named {surname} has a {round(probability * 100, 1)}% probability of churning
         Here is the customer's information:
         {input_dict}
@@ -163,10 +163,10 @@ def main():
         Make sure to include a list of incentives to stay based on their information, one bullet point per line. Don't ever mention the probability of churning, or the machine learning model to the customer. 
         
         # AUDIENCE #
-        This email is targeted to the customer {surname}. Make sure the incentives are tailored such that they make {surname} want to stay loyal to HS Bank.
+        This email is targeted to the customer {surname}. Make sure the incentives are tailored such that they make {surname} want to stay loyal to XYZ Bank.
 
         # RESPONSE #
-        Don't add that part at the end about the option to change the email and that it is just a template. Just give the email contents, and sign it by HS Bank, not the manager's name. Put the HS Bank signature on a new line
+        Don't add that part at the end about the option to change the email and that it is just a template. Just give the email contents, and sign it by XYZ Bank, not the manager's name. Put the XYZ Bank signature on a new line
         """
 
         raw_response = client.chat.completions.create(
