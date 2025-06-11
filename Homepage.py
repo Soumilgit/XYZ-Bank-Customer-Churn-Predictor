@@ -193,7 +193,3 @@ if __name__ == "__main__":
         from main import input_df, input_dict, percentiles, avg_probability
         from main import explanation, email
         
-        # Display the churn prediction content
-        st.title("Bank Customer Churn Prediction")
-        
-        # Rest of your churn prediction page content...
