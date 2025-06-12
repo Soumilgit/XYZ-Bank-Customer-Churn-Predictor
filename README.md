@@ -28,7 +28,7 @@ Analyzes 4K customers to predict churn risk with visual insights and AI-generate
 3. Add Groq API key to `secrets.toml` file under a new `.streamlit` folder  
 4. `streamlit run Homepage.py`
 
-## Research papers read — badges link to papers
+## Research references - badges link to papers
 <div style="display: flex; gap: 12px; align-items: center; margin: 15px 0;">
   <a href="https://www.researchgate.net/publication/340855263_Churning_of_Bank_Customers_Using_Supervised_Learning" style="text-decoration: none;">
     <img src="https://img.shields.io/badge/ResearchGate-00CCB?style=flat-square&logo=researchgate&logoColor=white&labelWidth=30&height=38" alt="Churning of Bank Customers Using Supervised Learning" style="height:32px;">
