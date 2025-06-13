@@ -1,45 +1,77 @@
 import plotly.graph_objects as go
-
 def create_gauge_chart(probability):
-    # Color scheme based on churn probability
-    if probability < 0.3:
-        color = "#2ecc71"  # Green
-        bg_colors = ["#92ef99", "#61de65", "#237626"]
+    # Determine color based on churn probability - darker versions
+    if probability < 0.15:
+        color = "#3e9c42"  # darker green
+    elif probability < 0.3:
+        color = "#1a5a1d"  # darker dark green
+    elif probability < 0.45:
+        color = "#c9a84d"  # darker gold
     elif probability < 0.6:
-        color = "#f39c12"  # Orange
-        bg_colors = ["#fff8e1", "#dfc67b", "#a0842e"]
+        color = "#7a641f"  # darker mustard
+    elif probability < 0.8:
+        color = "#9c4a54"  # darker rose
     else:
-        color = "#e74c3c"  # Red
-        bg_colors = ["#c88e97", "#bc6c74", "#8a3636"]
+        color = "#6a2828"  # darker red
 
     fig = go.Figure(
         go.Indicator(
             mode="gauge+number",
             value=probability * 100,
-            domain={"x": [0, 1], "y": [0, 1]},
+            domain={
+                "x": [0, 1],
+                "y": [0, 1]
+            },
             title={
                 "text": "Churn Probability",
-                "font": {"size": 24, "color": "white", "family": "Arial"}
+                "font": {
+                    "size": 24,
+                    "color": "white"
+                }
             },
             number={
-                "font": {"size": 40, "color": "white", "family": "Arial"},
-                "suffix": "%"
+                "font": {
+                    "size": 40,
+                    "color": "white"
+                }
             },
             gauge={
                 "axis": {
                     "range": [0, 100],
                     "tickwidth": 1,
                     "tickcolor": "white",
-                    "tickfont": {"color": "white", "size": 12}
                 },
-                "bar": {"color": color, "thickness": 0.3},
+                "bar": {
+                    "color": color
+                },
                 "bgcolor": "rgba(255,255,255,0.8)",
                 "borderwidth": 2,
-                "bordercolor": "#bdc3c7",
+                "bordercolor": "white",
                 "steps": [
-                    {"range": [0, 30], "color": bg_colors[0]},
-                    {"range": [30, 60], "color": bg_colors[1]},
-                    {"range": [60, 100], "color": bg_colors[2]}
+                    {
+                        "range": [0, 15],
+                        "color": "rgba(62,156,66,0.7)" 
+                    },
+                    {
+                        "range": [15, 30],
+                        "color": "rgba(26,90,29,0.7)"
+                    },
+                    {
+                        "range": [30, 45],
+                        "color": "rgba(201,168,77,0.7)"
+                    },
+                    {
+                        "range": [45, 60],
+                        "color": "rgba(122,100,31,0.7)"
+                    },
+                    {
+                        "range": [60, 80],
+                        "color": "rgba(156,74,84,0.7)"
+                    },
+                    {
+                        "range": [80, 100],
+                        "color": "rgba(106,40,40,0.7)"
+                    }
                 ],
                 "threshold": {
                     "line": {"color": "#34495e", "width": 4},
@@ -49,7 +81,6 @@ def create_gauge_chart(probability):
             }
         )
     )
-
 
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
@@ -62,7 +93,6 @@ def create_gauge_chart(probability):
     return fig
 
 def create_model_probability_chart(probabilities):
-    # Modern color gradient for models - ensure we have enough colors for all models
     colors = ["#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", "#f97316", "#10b981"]
     
     # Create a list of models sorted by probability (optional)
