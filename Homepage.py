@@ -1,7 +1,13 @@
 # Homepage.py
 import streamlit as st
 import base64
+import auth  # Make sure you create auth.py with main()
 
+st.set_page_config(
+        page_title="XYZ Bank Analytics",
+        page_icon="🏦",
+        layout="centered"
+    )
 def add_header_image(image_file):
     with open(image_file, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode()
@@ -17,13 +23,30 @@ def add_header_image(image_file):
 
 def main():
     # Set page config
-    st.set_page_config(
-        page_title="XYZ Bank Analytics",
-        page_icon="🏦",
-        layout="centered"
-    )
+    if "authenticated" not in st.session_state:
+        st.session_state["authenticated"] = False
+
+    # Sidebar Navigation
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Go to", ["Homepage", "Login/Signup"])
+
+    if page == "Login/Signup":
+        auth.main()
+        return
+
+    if not st.session_state["authenticated"]:
+        st.warning("⚠️ Please log in to access the dashboard.")
+        return
+
     
-    # Main content with clean styling
+    
+    
+
+    if page == "Login/Signup":
+        auth.main()  # Call auth.py's main function
+        return
+
+    # Main homepage layout
     st.markdown(
         """
         <style>
@@ -87,15 +110,12 @@ def main():
     )
     
     with st.container():
-        st.markdown("""
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <h1>XYZ Bank</h1>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("""<div style="text-align: center; margin-bottom: 2rem;"><h1>XYZ Bank</h1></div>""", unsafe_allow_html=True)
         try:
-           add_header_image('background.png')
+            add_header_image('background.png')
         except:
-           st.markdown("""<div style="text-align: center; margin-bottom: 2rem;"><h1>XYZ Bank</h1></div>""", unsafe_allow_html=True)
+            st.markdown("""<div style="text-align: center; margin-bottom: 2rem;"><h1>XYZ Bank</h1></div>""", unsafe_allow_html=True)
+        
         st.markdown('<h1 class="title">Customer Analytics Dashboard</h1>', unsafe_allow_html=True)
         st.markdown('<p class="subtitle">Advanced tools to understand and retain your customers</p>', unsafe_allow_html=True)
         
@@ -107,58 +127,42 @@ def main():
                     """
                     <div class="feature-card">
                         <div class="feature-title">Churn Prediction</div>
-                        <div class="feature-desc">
-                            Identify customers at risk of leaving with our machine learning models.
-                        </div>
+                        <div class="feature-desc">Identify customers at risk of leaving with our machine learning models.</div>
                     </div>
-                    """,
-                    unsafe_allow_html=True
+                    """, unsafe_allow_html=True
                 )
-                
                 st.markdown(
                     """
                     <div class="feature-card">
                         <div class="feature-title">Customer Insights</div>
-                        <div class="feature-desc">
-                            Understand customer behavior patterns and preferences.
-                        </div>
+                        <div class="feature-desc">Understand customer behavior patterns and preferences.</div>
                     </div>
-                    """,
-                    unsafe_allow_html=True
+                    """, unsafe_allow_html=True
                 )
-            
             with col2:
                 st.markdown(
                     """
                     <div class="feature-card">
                         <div class="feature-title">Retention Strategies</div>
-                        <div class="feature-desc">
-                            Get personalized recommendations to improve customer loyalty.
-                        </div>
+                        <div class="feature-desc">Get personalized recommendations to improve customer loyalty.</div>
                     </div>
-                    """,
-                    unsafe_allow_html=True
+                    """, unsafe_allow_html=True
                 )
-                
                 st.markdown(
                     """
                     <div class="feature-card">
                         <div class="feature-title">Performance Metrics</div>
-                        <div class="feature-desc">
-                            Track key indicators of customer satisfaction and engagement.
-                        </div>
+                        <div class="feature-desc">Track key indicators of customer satisfaction and engagement.</div>
                     </div>
-                    """,
-                    unsafe_allow_html=True
+                    """, unsafe_allow_html=True
                 )
         
-        # Main CTA button
         if st.button("Launch Churn Prediction Tool", key="churn_button"):
             st.session_state.page = "churn_prediction"
             st.rerun()
-        
+
         st.markdown('</div>', unsafe_allow_html=True)
-    
+
     # Footer
     st.markdown(
         """
@@ -177,14 +181,14 @@ def main():
         """,
         unsafe_allow_html=True
     )
+    
 
 if __name__ == "__main__":
     if "page" not in st.session_state:
         st.session_state.page = "homepage"
-    
+
     if st.session_state.page == "homepage":
         main()
     elif st.session_state.page == "churn_prediction":
-        # Import and run the churn prediction page
         import main
         main.main()
