@@ -1,10 +1,9 @@
-# main.py
 import streamlit as st
 import Homepage
 import auth
 import main_dashboard as dashboard  # renamed to avoid conflict with main.py itself
-
-
+import base64
+import utils as ut
 st.set_page_config(page_title="XYZ Bank Analytics", layout="centered")
 
 import utils as ut
@@ -15,6 +14,29 @@ if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 if "page" not in st.session_state:
     st.session_state["page"] = "Homepage"
+
+def add_sidebar_image(image_file):
+    with open(image_file, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode()
+    st.sidebar.markdown(
+        f"""
+        <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+            <img src="data:image/png;base64,{encoded_string}" style="max-height: 450px;">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# Sidebar header image or fallback
+try:
+    add_sidebar_image('sidebar.jpeg')
+except:
+    st.sidebar.markdown("""
+    <div style='text-align: center; margin-bottom: 20px; font-size: 24px; font-weight: bold;'>
+    ☰ Navigation
+    </div>
+    """, unsafe_allow_html=True)
 
 # Sidebar navigation UI
 st.sidebar.markdown("""
@@ -41,7 +63,6 @@ st.sidebar.markdown("""
     background-color: #0056b3;
 }
 </style>
-<div class='sidebar-title'>☰ Navigation</div>
 """, unsafe_allow_html=True)
 
 if st.session_state["authenticated"]:
@@ -69,7 +90,7 @@ if st.session_state["page"] == "Homepage":
     if not st.session_state["authenticated"]:
         st.markdown("""
         <div style="color: #856404; background-color: #fff3cd; border-left: 6px solid #ffeeba; padding: 12px; border-radius: 4px;">
-        ⚠️ Please log in to access the dashboard.
+        ⚠️ Please log in to access the dashboard. <span style="color: #721c24; background-color: #f8d7da; padding: 2px 5px; border-radius: 3px;">Use '>>' to access sidebar on mobile</span>
         </div>
         """, unsafe_allow_html=True)
     Homepage.main()

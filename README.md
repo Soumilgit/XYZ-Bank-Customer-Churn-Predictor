@@ -1,7 +1,7 @@
 # Bank Customer Churn Predictor
 
 ## Architecture
-![Screenshot 2025-06-15 170251](https://github.com/user-attachments/assets/db4bf82c-865f-4d2e-afdd-0b05a7311cbe)
+![Screenshot 2025-06-23 173901](https://github.com/user-attachments/assets/0096ae5f-3d94-4659-bb1f-0a1b5e2b3844)
 
 ## Description + stats
 - Bank customer churn prediction web app utilizing:
@@ -16,7 +16,7 @@ XGBoost + SMOTE Classifier - Accuracy: 83.87%
 Voting Classifier - Accuracy: 83.63%
 Mistral Saba 24B LLM [OpenAI]
 ```
-- Analyzes 4000 customers to predict churn risk with visual insights and AI-generated explanations/emails.
+- With Python, HTML-CSS, SQLite & EmailJS, it analyzes 4000 customers to predict churn risk with visual insights and AI-generated explanations/emails.
 
 ## Quick Start
 1. Clone repo  

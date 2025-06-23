@@ -3,11 +3,12 @@ import streamlit as st
 import base64
 
 
-
+'''
 st.set_page_config(
     page_title="XYZ Bank Analytics",
     layout="centered"
 )
+'''
 import utils as ut
 ut.apply_sidebar_styles()
 
