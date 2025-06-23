@@ -1,306 +1,83 @@
 # main.py
 import streamlit as st
-import pandas as pd
-import pickle
-import numpy as np
-from openai import OpenAI
-from dotenv import load_dotenv
-from scipy.stats import percentileofscore
-import os
-import utils as ut
+import Homepage
+import auth
+import main_dashboard as dashboard  # renamed to avoid conflict with main.py itself
 
-def main():
-    # Initialize sidebar navigation at the top level
-    st.sidebar.title("Navigation")
-    if st.sidebar.button("🏠 Return to Homepage"):
-        st.session_state.page = "homepage"
+
+st.set_page_config(page_title="XYZ Bank Analytics", layout="centered")
+
+import utils as ut
+ut.apply_sidebar_styles()
+
+# Initialize session state
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+if "page" not in st.session_state:
+    st.session_state["page"] = "Homepage"
+
+# Sidebar navigation UI
+st.sidebar.markdown("""
+<style>
+.sidebar-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+.sidebar-btn {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    margin: 0.3rem 0;
+    text-align: center;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+}
+.sidebar-btn:hover {
+    background-color: #0056b3;
+}
+</style>
+<div class='sidebar-title'>☰ Navigation</div>
+""", unsafe_allow_html=True)
+
+if st.session_state["authenticated"]:
+    if st.sidebar.button("🏠 HOMEPAGE", key="go_home"):
+        st.session_state["page"] = "Homepage"
+        st.rerun()
+    if st.sidebar.button("📊 DASHBOARD", key="go_dashboard"):
+        st.session_state["page"] = "Dashboard"
+        st.rerun()
+    if st.sidebar.button("🚪 LOGOUT", key="logout"):
+        st.session_state["authenticated"] = False
+        st.session_state["user"] = None
+        st.session_state["page"] = "Auth"
+        st.rerun()
+else:
+    if st.sidebar.button("🏠 HOMEPAGE", key="go_home_guest"):
+        st.session_state["page"] = "Homepage"
+        st.rerun()
+    if st.sidebar.button("🔐 LOGIN/SIGNUP", key="go_auth"):
+        st.session_state["page"] = "Auth"
         st.rerun()
 
-    st.sidebar.markdown("---")
-    st.sidebar.header("Bank Customer Churn Prediction")
+# Router to switch pages
+if st.session_state["page"] == "Homepage":
+    if not st.session_state["authenticated"]:
+        st.markdown("""
+        <div style="color: #856404; background-color: #fff3cd; border-left: 6px solid #ffeeba; padding: 12px; border-radius: 4px;">
+        ⚠️ Please log in to access the dashboard.
+        </div>
+        """, unsafe_allow_html=True)
+    Homepage.main()
 
-    # Load environment and models
-    load_dotenv()
-
-    client = OpenAI(
-        base_url="https://api.groq.com/openai/v1",
-        api_key=st.secrets["GROQ_API_KEY"],
-    )
-
-    @st.cache_resource
-    def load_model(filename):
-        with open(filename, 'rb') as file:
-            return pickle.load(file)
-
-    xgboost_model = load_model('models/xgb_model.pkl')
-    naive_bayes_model = load_model('models/nb_model.pkl')
-    random_forest_model = load_model('models/rf_model.pkl')
-    decision_tree_model = load_model('models/dt_model.pkl')
-    svm_model = load_model('models/svm_model.pkl')
-    knn_model = load_model('models/knn_model.pkl')
-    voting_classifier_model = load_model('models/voting_clf.pkl')
-    xgboost_SMOTE_model = load_model('models/xgboost-SMOTE.pkl')
-    xgboost_featureEngineered_model = load_model('models/xgboost-featureEngineered.pkl')
-    # After loading models
-    print("XGBoost SMOTE model features:", xgboost_SMOTE_model.get_booster().feature_names)
-    print("XGBoost Feature Engineered model features:", xgboost_featureEngineered_model.get_booster().feature_names) 
-
-    def prepare_input(credit_score, location, gender, age, tenure, balance,
-                num_of_products, has_credit_card, is_active_member,
-                estimated_salary):
-        tenure_age_ratio = tenure / age if age != 0 else 0
-        clv = (balance * tenure) / (age + 1)
+elif st.session_state["page"] == "Dashboard":
+    if st.session_state["authenticated"]:
+        dashboard.main()
     
-    # Age groups
-        age_group_middleage = 1 if 30 <= age < 50 else 0
-        age_group_senior = 1 if 50 <= age < 65 else 0
-        age_group_elderly = 1 if age >= 65 else 0
 
-    # Create dictionary with all possible features
-        input_dict = {
-        'CreditScore': credit_score,
-        'Age': age,
-        'Tenure': tenure,
-        'Balance': balance,
-        'NumOfProducts': num_of_products,
-        'HasCrCard': int(has_credit_card),
-        'IsActiveMember': int(is_active_member),
-        'EstimatedSalary': estimated_salary,
-        'Geography_Japan': 1 if location == "Japan" else 0,
-        'Geography_USA': 1 if location == "USA" else 0,
-        'Geography_Australia': 1 if location == "Australia" else 0,
-        'Gender_Male': 1 if gender == "Male" else 0,
-        'Gender_Female': 1 if gender == "Female" else 0,
-        'CLV': clv,
-        'TenureAgeRatio': tenure_age_ratio,
-        'AgeGroup_Middleage': age_group_middleage,
-        'AgeGroup_Senior': age_group_senior,
-        'AgeGroup_Elderly': age_group_elderly,
-        }
-    
-    # Get the exact feature order from the model
-        smote_features = xgboost_SMOTE_model.get_booster().feature_names
-        engineered_features = xgboost_featureEngineered_model.get_booster().feature_names
-    
-    # Create DataFrames with exact feature orders
-        input_df_smote = pd.DataFrame([input_dict])[smote_features]
-        input_df_engineered = pd.DataFrame([input_dict])[engineered_features]
-    
-    # For basic models, use just the core features
-        basic_features = [
-        'CreditScore', 'Age', 'Tenure', 'Balance', 'NumOfProducts',
-        'HasCrCard', 'IsActiveMember', 'EstimatedSalary',
-        'Geography_Japan', 'Geography_USA', 'Geography_Australia',
-        'Gender_Male', 'Gender_Female'
-        ]
-        input_df_basic = pd.DataFrame([input_dict])[basic_features]
-    
-        return {
-        'basic': input_df_basic,
-        'smote': input_df_smote,
-        'engineered': input_df_engineered,
-        'dict': input_dict
-        }
-
-    def calculate_percentiles(df, input_dict):
-        percentiles = {}
-        for feature in input_dict:
-            if (feature == 'CreditScore' or feature == 'Age' or feature == 'Tenure' or feature == 'Balance' or feature == 'NumOfProducts') and feature in df.columns:
-                value = input_dict[feature]
-                percentiles[feature] = percentileofscore(df[feature], value, kind='mean')
-        return percentiles
-
-    def make_predictions(input_dfs, input_dict, customer_percentiles):
-        probabilities = {
-        'XGBoost': xgboost_model.predict_proba(input_dfs['basic'])[0][1],
-        'Naive Bayes': naive_bayes_model.predict_proba(input_dfs['basic'])[0][1],
-        'Random Forest': random_forest_model.predict_proba(input_dfs['basic'])[0][1],
-        'Decision Tree': decision_tree_model.predict_proba(input_dfs['basic'])[0][1],
-        'SVM': svm_model.predict_proba(input_dfs['basic'])[0][1],
-        'K-Nearest Neighbors': knn_model.predict_proba(input_dfs['basic'])[0][1],
-        'XGBoost SMOTE': xgboost_SMOTE_model.predict_proba(input_dfs['smote'])[0][1],
-        'XGBoost Feature Engineered': xgboost_featureEngineered_model.predict_proba(input_dfs['engineered'])[0][1],
-        }
-    
-    # Rest of your function remains the same
-        avg_probability = np.mean(list(probabilities.values()))
-    
-        col1, col2 = st.columns(2)
-        with col1:
-            fig = ut.create_gauge_chart(avg_probability)
-            st.plotly_chart(fig, use_container_width=True)
-            st.write(f"The customer has a {avg_probability:.2%} probability of churning.")
-    
-        with col2:
-            fig_probs = ut.create_model_probability_chart(probabilities)
-            st.plotly_chart(fig_probs, use_container_width=True)
-    
-        percentile_chart = ut.create_percentile_bar_chart(customer_percentiles)
-        st.plotly_chart(percentile_chart, use_container_width=True)
-    
-        return avg_probability
-
-    def explain_prediction(probability, input_dict, surname):
-        prompt = f"""
-        # CONTEXT #
-        You are an expert data scientist at a bank, where you specialize in interpreting and explaining predictions of machine learning models.
-        Your machine learning model has predicted that a customer named {surname} has a {round(probability * 100, 1)}% probability of churning, based on the information provided below.
-        Here is the customer's information:
-        {input_dict}
-        Here are the machine learning model's top 10 most important features for predicting churns:
-                Features    |    Importance
-        ---------------------------------------
-          CreditScore      |    0.035005
-          Age              |    0.109550
-          Tenure           |    0.030054
-          Balance          |    0.052786
-          NumOfProducts    |    0.323888
-          HasCrCard       |    0.031940
-          IsActiveMember   |    0.164146
-          EstimatedSalary  |    0.032655
-          Geography_France |    0.046463
-          Geography_Germany|    0.091373
-          Geography_Spain  |    0.036855
-          Gender_Female    |    0.045283
-          Gender_Male      |    0.000000
-
-        {pd.set_option('display.max_columns', None)}
-
-        Here are summary statistics for churned customers:
-        {df[df['Exited'] == 1].describe()}
-
-        Here are summary statistics for non-churned customers:
-        {df[df['Exited'] == 0].describe()}
-
-        # STYLE #
-        The overall assessment must be accurate, but the explanation should focus on general trends and insights from these features without explicitly mentioning numbers, statistics, or probability values.
-
-        # OBJECTIVE #
-        - If {surname} is over 40% risk of churning, explain why by emphasizing behavioral patterns and tendencies common among customers with similar profiles.
-        - If {surname} is not over 40% risk of churning, explain why by focusing on aspects that typically indicate stability or satisfaction.
-
-        # AUDIENCE #
-        Direct this explanation towards users who do not have much knowledge of the background details of {surname} and how those details are working together. Don't include any jargon or references to any of the data used to derive the explanation.
-
-        # RESPONSE #
-        Avoid direct references to any specific figures, statistical terms, category names, probabilities, model, models, top 10 most important features, or technical jargon. Keep the explanation to under 4 sentences.
-        """
-
-        raw_response = client.chat.completions.create(
-            model='mistral-saba-24b',
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return raw_response.choices[0].message.content
-
-    def generate_email(probability, input_dict, explanation, surname):
-        prompt = f"""
-        # CONTEXT #
-        You are a manager at XYZ Bank. You are responsible for ensuring customers stay with the bank and are incentivized with various offers.
-        You noticed a customer named {surname} has a {round(probability * 100, 1)}% probability of churning
-        Here is the customer's information:
-        {input_dict}
-        Here is some explanation as to why the customer might be at risk of churning:
-        {explanation}
-        
-        # OBJECTIVE #
-        Generate an email to the customer based on their information, asking them to stay if they are at risk of churning, or offering them incentives so they become more loyal to the bank. 
-        Make sure to include a list of incentives to stay based on their information, one bullet point per line. Don't ever mention the probability of churning, or the machine learning model to the customer. 
-        
-        # AUDIENCE #
-        This email is targeted to the customer {surname}. Make sure the incentives are tailored such that they make {surname} want to stay loyal to XYZ Bank.
-
-        # RESPONSE #
-        Don't add that part at the end about the option to change the email and that it is just a template. Just give the email contents, and sign it by XYZ Bank, not the manager's name. Put the XYZ Bank signature on a new line
-        """
-
-        raw_response = client.chat.completions.create(
-            model="mistral-saba-24b",
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return raw_response.choices[0].message.content
-
-    st.title("Bank Customer Churn Prediction")
-
-    df = pd.read_csv("churn.csv")
-
-    customers = [
-        f"{row['CustomerId']} - {row['Surname']}" for _, row in df.iterrows()
-    ]
-
-    selected_customer_option = st.selectbox("Customer selection", customers)
-
-    if selected_customer_option:
-        selected_customer_id = int(selected_customer_option.split(' - ')[0])
-        selected_surname = selected_customer_option.split(' - ')[1]
-        selected_customer = df.loc[df['CustomerId'] == selected_customer_id].iloc[0]
-
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            credit_score = st.number_input("Credit Score",
-                                         min_value=300,
-                                         max_value=850,
-                                         value=selected_customer['CreditScore'])
-            
-            location = st.selectbox("Location", ["Australia", "Japan", "USA"],
-                                  index=["Australia", "Japan", "USA"]
-                                         .index(selected_customer["Geography"]))
-            
-            gender = st.radio("Gender", ["Male", "Female"],
-                            index=0 if selected_customer["Gender"] == "Male" else 1)
-            
-            age = st.number_input("Age",
-                                min_value=10,
-                                max_value=100,
-                                value=int(selected_customer["Age"]))
-            
-            tenure = st.number_input("Tenure (years)",
-                                   min_value=0,
-                                   max_value=50,
-                                   value=int(selected_customer["Tenure"]))
-        
-        with col2:
-            balance = st.number_input("Balance",
-                                    min_value=0.0,
-                                    value=float(selected_customer["Balance"]))
-            
-            min_products = st.number_input("Number of Products",
-                                         min_value=1,
-                                         max_value=10,
-                                         value=int(selected_customer['NumOfProducts']))
-            
-            has_credit_card = st.checkbox("Has Credit Card",
-                                        value=bool(selected_customer["HasCrCard"]))
-            
-            is_active_member = st.checkbox("Is Active Member",
-                                         value=bool(selected_customer["IsActiveMember"]))
-            
-            estimated_salary = st.number_input(
-                "Estimated Salary",
-                min_value=0.0,
-                value=float(selected_customer["EstimatedSalary"]))
-
-            input_dfs_and_dict = prepare_input(credit_score, location, gender, age,
-                                     tenure, balance, min_products,
-                                     has_credit_card, is_active_member,
-                                     estimated_salary)
-
-        percentiles = calculate_percentiles(df, input_dfs_and_dict['dict'])
-        avg_probability = make_predictions(input_dfs_and_dict, input_dfs_and_dict['dict'], percentiles)
-
-        explanation = explain_prediction(avg_probability, input_dfs_and_dict['dict'],
-                                       selected_customer["Surname"])
-
-        st.markdown("---")
-        st.markdown("## Explanation of Prediction")
-        st.markdown(explanation)
-
-        email = generate_email(avg_probability, input_dfs_and_dict['dict'], explanation,
-                             selected_customer["Surname"])
-
-        st.markdown("---")
-        st.markdown("## Personalized Email")
-        st.markdown(email)
-
-if __name__ == "__main__":
-    main()
+elif st.session_state["page"] == "Auth":
+    auth.main()

@@ -4,6 +4,9 @@ import sqlite3
 import requests
 import re
 
+import utils as ut
+ut.apply_sidebar_styles()
+
 # --- SECRETS FROM .streamlit/secrets.toml ---
 EMAILJS_SERVICE_ID = st.secrets["EMAILJS_SERVICE_ID"]
 EMAILJS_TEMPLATE_ID = st.secrets["EMAILJS_TEMPLATE_ID"]
@@ -168,11 +171,6 @@ def login_signup_interface():
         forgot_password_flow()
 
 # --- LOGOUT ---
-def logout_button():
-    if st.sidebar.button("🚪 Logout"):
-        st.session_state["authenticated"] = False
-        st.session_state["user"] = None
-        st.rerun()
 
 # --- MAIN ---
 def main():
@@ -182,6 +180,6 @@ def main():
 
     if st.session_state["authenticated"]:
         st.success(f"🔓 Logged in as {st.session_state['user']}")
-        logout_button()
+        
     else:
         login_signup_interface()

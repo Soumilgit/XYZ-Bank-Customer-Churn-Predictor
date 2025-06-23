@@ -178,3 +178,33 @@ def create_percentile_bar_chart(percentiles):
         margin=dict(l=20, r=20, t=60, b=100)  # Extra bottom margin for rotated labels
     )
     return fig
+
+def apply_sidebar_styles():
+    import streamlit as st
+    st.markdown("""
+    <style>
+    /* Streamlit sidebar buttons targeting */
+    [data-testid="stSidebar"] button {
+        background-color: #007BFF;
+        color: white;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        margin: 0.4rem 0;
+        font-size: 16px;
+        width: 100%;
+        border: none;
+    }
+
+    [data-testid="stSidebar"] button:hover {
+        background-color: #0056b3;
+    }
+
+    /* Optional: style sidebar section title */
+    [data-testid="stSidebar"] .sidebar-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+    }
+    </style>
+    """, unsafe_allow_html=True)
