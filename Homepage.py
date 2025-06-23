@@ -83,6 +83,16 @@ def main():
             background-color: #2980b9;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
+        .stButton>button:disabled {
+    background-color: #6c4db0 !important; /* reddish-blue */
+    color: #f8f9fa !important;
+    border: none !important;
+    cursor: not-allowed !important;
+    opacity: 1 !important; /* override faded look */
+    font-weight: 600;
+    border-radius: 4px;
+}
+
         </style>
         """,
         unsafe_allow_html=True
@@ -128,9 +138,15 @@ def main():
                     </div>
                     """, unsafe_allow_html=True)
 
-        if st.button("Launch Churn Prediction Tool", key="churn_button"):
-            st.session_state.page = "Dashboard"
-            st.rerun()
+        is_authenticated = st.session_state.get("authenticated", False)
+
+        if is_authenticated:
+            if st.button("Launch Churn Prediction Tool", key="churn_button"):
+                st.session_state.page = "Dashboard"
+                st.rerun()
+        else:
+                st.button("🔒 Please log in to access Churn Tool", disabled=True)
+
 
     st.markdown("""
     <style>
