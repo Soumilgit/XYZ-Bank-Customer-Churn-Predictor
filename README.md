@@ -21,8 +21,8 @@ Mistral Saba 24B LLM [OpenAI]
 ## Quick Start
 1. Clone repo  
 2. `pip install -r requirements.txt`  
-3. Add Groq API key to `secrets.toml` file under a new `.streamlit` folder  
-4. `streamlit run Homepage.py`
+3. Add Groq & EmailJS API keys to `secrets.toml` file under a new `.streamlit` folder  
+4. `streamlit run main.py`
 
 ## Research references - badges link to papers
 <div style="display: flex; gap: 12px; align-items: center; margin: 15px 0;">
