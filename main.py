@@ -1,80 +1,97 @@
 import streamlit as st
-import base64
 import Homepage
 import auth
-import main_dashboard as dashboard
+import main_dashboard as dashboard  # renamed to avoid conflict with main.py itself
+import base64
 import utils as ut
+st.set_page_config(page_title="XYZ Bank Analytics", layout="centered", 
+                   initial_sidebar_state="expanded")
 
-# --- Page config (REMOVE expanded default) ---
-st.set_page_config(
-    page_title="XYZ Bank Analytics",
-    layout="centered"
-)
+import utils as ut
+ut.apply_sidebar_styles()
 
-# --- Session state setup ---
+# Initialize session state
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 if "page" not in st.session_state:
     st.session_state["page"] = "Homepage"
 
-# --- Optional: Only expand sidebar on desktop via JS ---
-st.markdown("""
-<script>
-const mq = window.matchMedia("(min-width: 768px)");
-if (mq.matches) {
-    const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
-    if (sidebar) sidebar.style.display = "block";
+def add_sidebar_image(image_file):
+    with open(image_file, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode()
+    st.sidebar.markdown(
+        f"""
+        <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+            <img src="data:image/png;base64,{encoded_string}" style="max-height: 450px;">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# Sidebar header image or fallback
+try:
+    add_sidebar_image('sidebar.jpeg')
+except:
+    st.sidebar.markdown("""
+    <div style='text-align: center; margin-bottom: 20px; font-size: 24px; font-weight: bold;'>
+    ☰ Navigation
+    </div>
+    """, unsafe_allow_html=True)
+
+# Sidebar navigation UI
+st.sidebar.markdown("""
+<style>
+.sidebar-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
 }
-</script>
+.sidebar-btn {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    margin: 0.3rem 0;
+    text-align: center;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+}
+.sidebar-btn:hover {
+    background-color: #0056b3;
+}
+</style>
 """, unsafe_allow_html=True)
 
-# --- Styles from utils ---
-ut.apply_sidebar_styles()
-
-# --- Sidebar image (if any) ---
-def add_sidebar_image(image_file):
-    try:
-        with open(image_file, "rb") as f:
-            encoded = base64.b64encode(f.read()).decode()
-        st.sidebar.markdown(f"""
-            <div style="text-align: center; margin-bottom: 1rem;">
-                <img src="data:image/png;base64,{encoded}" style="max-height: 300px;" />
-            </div>
-        """, unsafe_allow_html=True)
-    except:
-        st.sidebar.markdown("## ☰ XYZ Bank")
-
-add_sidebar_image("sidebar.jpeg")
-
-# --- Sidebar navigation ---
-st.sidebar.markdown("### 🔹 Navigation")
-
 if st.session_state["authenticated"]:
-    if st.sidebar.button("🏠 Homepage"):
+    if st.sidebar.button("🏠 HOMEPAGE", key="go_home"):
         st.session_state["page"] = "Homepage"
         st.rerun()
-    if st.sidebar.button("📊 Dashboard"):
+    if st.sidebar.button("📊 DASHBOARD", key="go_dashboard"):
         st.session_state["page"] = "Dashboard"
         st.rerun()
-    if st.sidebar.button("🚪 Logout"):
+    if st.sidebar.button("🚪 LOGOUT", key="logout"):
         st.session_state["authenticated"] = False
         st.session_state["user"] = None
-        st.session_state["page"] = "Homepage"
+        st.session_state["page"] = "Auth"
         st.rerun()
 else:
-    if st.sidebar.button("🏠 Homepage"):
+    if st.sidebar.button("🏠 HOMEPAGE", key="go_home_guest"):
         st.session_state["page"] = "Homepage"
         st.rerun()
-    if st.sidebar.button("🔐 Login / Signup"):
+    if st.sidebar.button("🔐 LOGIN/SIGNUP", key="go_auth"):
         st.session_state["page"] = "Auth"
         st.rerun()
 
-# --- Page routing ---
+# Router to switch pages
 if st.session_state["page"] == "Homepage":
     if not st.session_state["authenticated"]:
         st.markdown("""
         <div style="color: #856404; background-color: #fff3cd; border-left: 6px solid #ffeeba; padding: 12px; border-radius: 4px;">
-        ⚠️ Please log in to access the dashboard. <span style="color: #721c24; background-color: #f8d7da; padding: 2px 5px; border-radius: 3px;">Use ☰ to open the menu on mobile.</span>
+        ⚠️ Please login to access the dashboard.
         </div>
         """, unsafe_allow_html=True)
     Homepage.main()
@@ -82,8 +99,7 @@ if st.session_state["page"] == "Homepage":
 elif st.session_state["page"] == "Dashboard":
     if st.session_state["authenticated"]:
         dashboard.main()
-    else:
-        st.warning("Please log in to access the dashboard.")
+    
 
 elif st.session_state["page"] == "Auth":
     auth.main()
