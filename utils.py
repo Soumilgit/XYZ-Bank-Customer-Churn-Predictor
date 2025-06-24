@@ -199,7 +199,6 @@ def apply_sidebar_styles():
         background-color: #0056b3;
     }
 
-    /* Optional: style sidebar section title */
     [data-testid="stSidebar"] .sidebar-title {
         font-size: 24px;
         font-weight: bold;
