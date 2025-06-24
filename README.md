@@ -16,7 +16,10 @@ XGBoost + SMOTE Classifier - Accuracy: 83.87%
 Voting Classifier - Accuracy: 83.63%
 Mistral Saba 24B LLM [OpenAI]
 ```
-- With Python, HTML-CSS, SQLite & EmailJS, it analyzes 4000 customers to predict churn risk with visual insights and AI-generated explanations/emails.
+- With Python, HTML-CSS, SQLite & EmailJS, it ingests 4000 customer data entries to predict churn risk with visual insights and AI-generated explanations/emails.
+
+## Database
+https://github.com/user-attachments/assets/af1fa292-a299-4aca-bb1e-174fd63661f3
 
 ## Quick Start
 1. Clone repo  

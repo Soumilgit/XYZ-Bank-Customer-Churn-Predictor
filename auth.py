@@ -200,7 +200,7 @@ def main():
             st.session_state["post_login_hint_shown"] = True
             st.markdown("""
             <div class="zoom-box-login">
-                🚀 <strong>Use '≫' at the top-left to access the dashboard.</strong>
+                🚀 <strong>Use '≫', top-left, to access dashboard/logout.</strong>
             </div>
             <style>
             .zoom-box-login {
