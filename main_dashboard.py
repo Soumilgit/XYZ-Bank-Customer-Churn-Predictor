@@ -1,4 +1,3 @@
-# main.py
 import streamlit as st
 import pandas as pd
 import pickle
@@ -13,12 +12,9 @@ import utils as ut
 ut.apply_sidebar_styles()
 
 def main():
-    # Initialize sidebar navigation at the top level
-    
-
     st.sidebar.markdown("---")
     st.sidebar.header("Bank Customer Churn Prediction")
-
+    
     # Load environment and models
     load_dotenv()
 
@@ -121,8 +117,7 @@ def main():
         'XGBoost SMOTE': xgboost_SMOTE_model.predict_proba(input_dfs['smote'])[0][1],
         'XGBoost Feature Engineered': xgboost_featureEngineered_model.predict_proba(input_dfs['engineered'])[0][1],
         }
-    
-    # Rest of your function remains the same
+
         avg_probability = np.mean(list(probabilities.values()))
     
         col1, col2 = st.columns(2)

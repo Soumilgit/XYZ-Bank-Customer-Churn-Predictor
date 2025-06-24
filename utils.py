@@ -1,18 +1,17 @@
 import plotly.graph_objects as go
 def create_gauge_chart(probability):
-    # Determine color based on churn probability - darker versions
     if probability < 0.15:
-        color = "#3e9c42"  # darker green
+        color = "#3e9c42" 
     elif probability < 0.3:
-        color = "#1a5a1d"  # darker dark green
+        color = "#1a5a1d" 
     elif probability < 0.45:
-        color = "#c9a84d"  # darker gold
+        color = "#c9a84d" 
     elif probability < 0.6:
-        color = "#7a641f"  # darker mustard
+        color = "#7a641f"  
     elif probability < 0.8:
-        color = "#9c4a54"  # darker rose
+        color = "#9c4a54"
     else:
-        color = "#6a2828"  # darker red
+        color = "#6a2828" 
 
     fig = go.Figure(
         go.Indicator(
@@ -94,8 +93,7 @@ def create_gauge_chart(probability):
 
 def create_model_probability_chart(probabilities):
     colors = ["#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", "#f97316", "#10b981"]
-    
-    # Create a list of models sorted by probability (optional)
+
     sorted_models = sorted(probabilities.keys(), key=lambda x: probabilities[x], reverse=True)
     
     fig = go.Figure(data=[
@@ -106,7 +104,7 @@ def create_model_probability_chart(probabilities):
             text=[f'{p:.1%}' for p in probabilities.values()],
             textposition='auto',
             textfont={"color": "white"},
-            marker_color=colors[:len(probabilities)],  # Use as many colors as needed
+            marker_color=colors[:len(probabilities)], 
             marker_line_color='rgba(255,255,255,0.3)',
             marker_line_width=1
         )
@@ -199,7 +197,6 @@ def apply_sidebar_styles():
         background-color: #0056b3;
     }
 
-    /* Optional: style sidebar section title */
     [data-testid="stSidebar"] .sidebar-title {
         font-size: 24px;
         font-weight: bold;
