@@ -4,9 +4,9 @@ import auth
 import main_dashboard as dashboard  # renamed to avoid conflict with main.py itself
 import base64
 import utils as ut
-st.set_page_config(page_title="XYZ Bank Analytics", layout="centered" )
 
-import utils as ut
+st.set_page_config(page_title="XYZ Bank Analytics", layout="centered")
+
 ut.apply_sidebar_styles()
 
 # Initialize session state
@@ -27,8 +27,7 @@ def add_sidebar_image(image_file):
         unsafe_allow_html=True
     )
 
-
-# Sidebar header image or fallback
+# Sidebar fallback if image fails
 try:
     add_sidebar_image('sidebar.jpeg')
 except:
@@ -38,7 +37,7 @@ except:
     </div>
     """, unsafe_allow_html=True)
 
-# Sidebar navigation UI
+# Sidebar navigation
 st.sidebar.markdown("""
 <style>
 .sidebar-title {
@@ -65,6 +64,7 @@ st.sidebar.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Sidebar content based on login
 if st.session_state["authenticated"]:
     if st.sidebar.button("🏠 HOMEPAGE", key="go_home"):
         st.session_state["page"] = "Homepage"
@@ -85,20 +85,53 @@ else:
         st.session_state["page"] = "Auth"
         st.rerun()
 
-# Router to switch pages
+# Page Routing
 if st.session_state["page"] == "Homepage":
     if not st.session_state["authenticated"]:
+        # Yellow warning
         st.markdown("""
-        <div style="color: #856404; background-color: #fff3cd; border-left: 6px solid #ffeeba; padding: 12px; border-radius: 4px;">
-        ⚠️ Please login to access the dashboard.<span style="color: #721c24; background-color: #f8d7da; padding: 2px 5px; border-radius: 3px;">Use '>>' to access sidebar.</span>
+        <div style="color: #856404; background-color: #fff3cd; border-left: 6px solid #ffeeba;
+        padding: 12px; border-radius: 4px; margin-bottom: 12px;font-size: 26px;">
+            ⚠️ Please login to access the dashboard.
         </div>
         """, unsafe_allow_html=True)
+
+        # Red box below yellow, zoom animated once
+        if "animated_hint_shown" not in st.session_state:
+            st.session_state["animated_hint_shown"] = True
+            st.markdown("""
+            <div class="zoom-box">
+                📢 <strong>Use '≫' at the top-left to open the menu and login.</strong>
+            </div>
+            <style>
+            .zoom-box {
+                background-color: #f8d7da;
+                color: #721c24;
+                padding: 14px 20px;
+                border-radius: 6px;
+                font-size: 26px;
+                border-left: 6px solid #f5c6cb;
+                margin-bottom: 24px;
+                animation: zoomIn 0.6s ease;
+            }
+            @keyframes zoomIn {
+                0% {
+                    opacity: 0;
+                    transform: scale(0.8);
+                }
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+            </style>
+            """, unsafe_allow_html=True)
+
     Homepage.main()
 
 elif st.session_state["page"] == "Dashboard":
     if st.session_state["authenticated"]:
         dashboard.main()
-    
 
 elif st.session_state["page"] == "Auth":
     auth.main()

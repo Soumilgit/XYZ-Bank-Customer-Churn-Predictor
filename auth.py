@@ -179,7 +179,54 @@ def main():
         st.session_state["authenticated"] = False
 
     if st.session_state["authenticated"]:
-        st.success(f"🔓 Logged in as {st.session_state['user']}, plz use '>>' to access other pages.")
-        
+        # Green success message (stays)
+        st.markdown(f"""
+        <div style="
+    color: #155724;
+    background-color: #d4edda;
+    border-left: 6px solid #c3e6cb;
+    padding: 14px 20px;
+    border-radius: 6px;
+    font-size: 26px;
+    margin-bottom: 12px;
+    font-weight: 500;">
+    🔓 Logged in as {st.session_state['user']}
+   </div>
+    """, unsafe_allow_html=True)
+
+
+        # Red alert with zoom animation, shown once
+        if "post_login_hint_shown" not in st.session_state:
+            st.session_state["post_login_hint_shown"] = True
+            st.markdown("""
+            <div class="zoom-box-login">
+                🚀 <strong>Use '≫' at the top-left to access the dashboard.</strong>
+            </div>
+            <style>
+            .zoom-box-login {
+                background-color: #f8d7da;
+                color: #721c24;
+                padding: 14px 20px;
+                border-radius: 6px;
+                font-size: 26px;
+                border-left: 6px solid #f5c6cb;
+                margin-top: 10px;
+                margin-bottom: 24px;
+                animation: zoomIn 0.6s ease;
+            }
+            @keyframes zoomIn {
+                0% {
+                    opacity: 0;
+                    transform: scale(0.8);
+                }
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+            </style>
+            """, unsafe_allow_html=True)
+
     else:
         login_signup_interface()
+
