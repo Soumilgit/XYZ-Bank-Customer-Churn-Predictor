@@ -179,7 +179,7 @@ def main():
         st.session_state["authenticated"] = False
 
     if st.session_state["authenticated"]:
-        st.success(f"🔓 Logged in as {st.session_state['user']}")
+        st.success(f"🔓 Logged in as {st.session_state['user']}, plz use '>>' to access other pages.")
         
     else:
         login_signup_interface()

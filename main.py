@@ -4,8 +4,7 @@ import auth
 import main_dashboard as dashboard  # renamed to avoid conflict with main.py itself
 import base64
 import utils as ut
-st.set_page_config(page_title="XYZ Bank Analytics", layout="centered", 
-                   initial_sidebar_state="expanded")
+st.set_page_config(page_title="XYZ Bank Analytics", layout="centered" )
 
 import utils as ut
 ut.apply_sidebar_styles()
@@ -91,7 +90,7 @@ if st.session_state["page"] == "Homepage":
     if not st.session_state["authenticated"]:
         st.markdown("""
         <div style="color: #856404; background-color: #fff3cd; border-left: 6px solid #ffeeba; padding: 12px; border-radius: 4px;">
-        ⚠️ Please login to access the dashboard.
+        ⚠️ Please login to access the dashboard.<span style="color: #721c24; background-color: #f8d7da; padding: 2px 5px; border-radius: 3px;">Use '>>' to access sidebar.</span>
         </div>
         """, unsafe_allow_html=True)
     Homepage.main()
