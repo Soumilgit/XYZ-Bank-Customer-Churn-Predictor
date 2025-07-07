@@ -1,7 +1,7 @@
 # Bank Customer Churn Predictor
 
 ## Architecture
-![Screenshot 2025-06-23 173901](https://github.com/user-attachments/assets/0096ae5f-3d94-4659-bb1f-0a1b5e2b3844)
+![Screenshot 2025-07-07 221306](https://github.com/user-attachments/assets/c4c2474b-dc7c-42cb-9820-05627cb35349)
 
 ## Description + stats
 - Bank customer churn prediction web app utilizing:
@@ -16,19 +16,19 @@ XGBoost + SMOTE Classifier - Accuracy: 83.87%
 Voting Classifier - Accuracy: 83.63%
 Mistral Saba 24B LLM [OpenAI]
 ```
-- With Python, HTML-CSS, SQLite & EmailJS, it ingests 4000 customer data entries to predict churn risk with visual insights and AI-generated explanations/emails.
+- With Python, HTML-CSS-JS, Supabase & EmailJS, it ingests 4000 customer data entries to predict churn risk with visual insights and AI-generated explanations/emails.
 - <code><ins>Custom Kaggle dataset, usability score <code>9.41</code>:<ins></code>
   <a href="https://www.kaggle.com/datasets/soumilmukhopadhyay/xyz-bank-customer-churn" style="text-decoration: none;">
     <img src="https://img.shields.io/badge/Kaggle-20BEFF?style=flat-square&logo=kaggle&logoColor=white&labelWidth=30&height=30" alt="Kaggle dataset" style="height:30px;">
   </a>
 
 ## Database
-https://github.com/user-attachments/assets/af1fa292-a299-4aca-bb1e-174fd63661f3
+https://github.com/user-attachments/assets/346ee74b-fe51-4eb0-8a22-f988abfc73dd
 
 ## Quick Start
 1. Clone repo  
 2. `pip install -r requirements.txt`  
-3. Add Groq & EmailJS API keys to `secrets.toml` file under a new `.streamlit` folder  
+3. Add Groq, Supabase & EmailJS API keys to `secrets.toml` file under a new `.streamlit` folder  
 4. `streamlit run main.py`
 
 ## Research references - badges link to papers
