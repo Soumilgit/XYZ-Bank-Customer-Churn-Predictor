@@ -1,4 +1,5 @@
 import plotly.graph_objects as go
+
 def create_gauge_chart(probability):
     if probability < 0.15:
         color = "#3e9c42" 
@@ -94,14 +95,16 @@ def create_gauge_chart(probability):
 def create_model_probability_chart(probabilities):
     colors = ["#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", "#f97316", "#10b981"]
 
-    sorted_models = sorted(probabilities.keys(), key=lambda x: probabilities[x], reverse=True)
+    sorted_items = sorted(probabilities.items(), key=lambda x: x[1], reverse=True)
+    sorted_labels = [item[0] for item in sorted_items]
+    sorted_values = [item[1] for item in sorted_items]
     
     fig = go.Figure(data=[
         go.Bar(
-            y=list(probabilities.keys()),
-            x=list(probabilities.values()),
+            y=sorted_labels, 
+            x=sorted_values,  
             orientation='h',
-            text=[f'{p:.1%}' for p in probabilities.values()],
+            text=[f'{p:.1%}' for p in sorted_values],
             textposition='auto',
             textfont={"color": "white"},
             marker_color=colors[:len(probabilities)], 
@@ -181,27 +184,42 @@ def apply_sidebar_styles():
     import streamlit as st
     st.markdown("""
     <style>
-    /* Streamlit sidebar buttons targeting */
     [data-testid="stSidebar"] button {
-        background-color: #007BFF;
-        color: white;
-        border-radius: 6px;
-        padding: 0.5rem 1rem;
-        margin: 0.4rem 0;
-        font-size: 16px;
-        width: 100%;
-        border: none;
+        background-color: #007BFF !important;
+        color: white !important;
+        border-radius: 6px !important;
+        padding: 0.5rem 1rem !important;
+        margin: 0.4rem 0 !important;
+        font-size: 16px !important;
+        width: 100% !important;
+        border: none !important;
+        display: block !important;
+        min-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     [data-testid="stSidebar"] button:hover {
-        background-color: #0056b3;
+        background-color: #0056b3 !important;
     }
 
     [data-testid="stSidebar"] .sidebar-title {
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 20px;
-        color: #333;
+        font-size: 24px !important;
+        font-weight: bold !important;
+        margin-bottom: 20px !important;
+        color: #333 !important;
+    }
+    
+    /* Force buttons to match image width */
+    [data-testid="stSidebar"] .sidebar-image-container {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    [data-testid="stSidebar"] .sidebar-buttons-container {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
     </style>
     """, unsafe_allow_html=True)

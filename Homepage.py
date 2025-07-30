@@ -148,7 +148,6 @@ def main():
         st.markdown('<h1 class="title">Customer Analytics</h1>', unsafe_allow_html=True)
         st.markdown('<p class="subtitle">Advanced tools to know and keep customers.</p>', unsafe_allow_html=True)
 
-        # 🚀 Product Hunt Badge embedded here
         st.markdown(
             """
             <div style="text-align: center; margin-bottom: 2rem;">
@@ -190,15 +189,25 @@ def main():
         is_authenticated = st.session_state.get("authenticated", False)
 
         if is_authenticated:
-            if st.button("🔄 Launch Churn Prediction Tool", key="churn_button"):
-                st.session_state.page = "Dashboard"
-                st.rerun()
-            if st.button("📈 Launch Graphs Dashboard", key="graphs_button"):
-                st.session_state.page = "Graphs"
-                st.rerun()
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🔄 Launch Churn Prediction Tool", key="churn_button", 
+                        use_container_width=True):
+                    st.session_state.page = "Dashboard"
+                    st.rerun()
+            with col2:
+                if st.button("📈 Launch Graphs Dashboard", key="graphs_button",
+                        use_container_width=True):
+                    st.session_state.page = "Graphs"
+                    st.rerun()
         else:
-            st.button("🔒 Log in to access Churn Tool", disabled=True)
-            st.button("🔒 Log in to access Churn Graphs", disabled=True)
+            col1, col2 = st.columns(2)
+            with col1:
+                st.button("🔒 Log in to access Churn Tool", disabled=True, 
+                        use_container_width=True)
+            with col2:
+                st.button("🔒 Log in to access Churn Graphs", disabled=True,
+                        use_container_width=True)
 
     st.markdown("""
     <div class="footer">

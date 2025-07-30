@@ -1,7 +1,6 @@
 import streamlit as st
 import utils as ut
 from PIL import Image
-import base64
 import numpy as np
 
 ut.apply_sidebar_styles()

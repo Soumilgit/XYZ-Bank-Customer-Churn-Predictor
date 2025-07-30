@@ -24,10 +24,10 @@
 
 | Purpose              | Technologies |
 |----------------------|--------------|
-| **Core Tech** | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=black) ![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=black) ![OpenAI](https://img.shields.io/badge/OpenAI-8968CD?style=for-the-badge&logo=openai&logoColor=black)|
+| **Core Tech** | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=black) ![scikit-learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=black) ![OpenAI](https://img.shields.io/badge/OpenAI-8968CD?style=for-the-badge&logo=openai&logoColor=black) ![Plotly](https://img.shields.io/badge/plotly-7A76FF?style=for-the-badge&logo=plotly&logoColor=black)|
 | **Frontend & Framework** | ![HTML](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=black) ![CSS](https://img.shields.io/badge/CSS3-0080FE?style=for-the-badge&logo=css&logoColor=black) ![JavaScript](https://img.shields.io/badge/JS-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=black) |
 | **Backend + DB** | ![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=black) ![EmailJS](https://img.shields.io/badge/EmailJS-FF9A00?style=for-the-badge&logo=mailboxdotorg&logoColor=black) |
-| **Other Libraries** |  ![NumPy](https://img.shields.io/badge/NumPy-7285A5?style=for-the-badge&logo=numpy&logoColor=black) ![Pandas](https://img.shields.io/badge/Pandas-A865B5?style=for-the-badge&logo=pandas&logoColor=black) ![SciPy](https://img.shields.io/badge/SciPy-8CAAE6?style=for-the-badge&logo=scipy&logoColor=black) ![Plotly](https://img.shields.io/badge/plotly-7A76FF?style=for-the-badge&logo=plotly&logoColor=black)  |
+| **Other Libraries** |  ![NumPy](https://img.shields.io/badge/NumPy-7285A5?style=for-the-badge&logo=numpy&logoColor=black) ![Pandas](https://img.shields.io/badge/Pandas-A865B5?style=for-the-badge&logo=pandas&logoColor=black) ![SciPy](https://img.shields.io/badge/SciPy-8CAAE6?style=for-the-badge&logo=scipy&logoColor=black) ![Pillow](https://img.shields.io/badge/Pillow-D3D3D3?style=for-the-badge&logo=imagedotsc&logoColor=black) |
 
 ## Database + authentication
 https://github.com/user-attachments/assets/9aea195d-7073-4813-9a08-3648790b84ce

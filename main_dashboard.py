@@ -5,9 +5,9 @@ import numpy as np
 from openai import OpenAI
 from dotenv import load_dotenv
 from scipy.stats import percentileofscore
-import os
 import utils as ut
 import re
+from sklearn.preprocessing import MinMaxScaler
 
 ut.apply_sidebar_styles()
 
@@ -30,9 +30,7 @@ def main():
     xgboost_model = load_model('models/xgb_model.pkl')
     naive_bayes_model = load_model('models/nb_model.pkl')
     random_forest_model = load_model('models/rf_model.pkl')
-    decision_tree_model = load_model('models/dt_model.pkl')
     svm_model = load_model('models/svm_model.pkl')
-    knn_model = load_model('models/knn_model.pkl')
     voting_classifier_model = load_model('models/voting_clf.pkl')
     xgboost_SMOTE_model = load_model('models/xgboost-SMOTE.pkl')
     xgboost_featureEngineered_model = load_model('models/xgboost-featureEngineered.pkl')
@@ -96,17 +94,44 @@ def main():
                 value = input_dict[feature]
                 percentiles[feature] = percentileofscore(df[feature], value, kind='mean')
         return percentiles
+    
+    def get_voting_score(model, X):
+        if hasattr(model, "predict_proba"):
+            return model.predict_proba(X)[0][1]
+        elif hasattr(model, "decision_function"):
+            from scipy.special import expit
+            return expit(model.decision_function(X))[0]
+        else:
+            est_outputs = []
+            for est in model.estimators_:
+                if hasattr(est, "predict_proba"):
+                    est_outputs.append(est.predict_proba(X)[0][1])
+                elif hasattr(est, "decision_function"):
+                    from scipy.special import expit
+                    est_outputs.append(expit(est.decision_function(X))[0])
+                else:
+                    est_outputs.append(float(est.predict(X)[0]))
+            return float(np.mean(est_outputs))
 
-    def make_predictions(input_dfs, input_dict, customer_percentiles):
+    def get_nb_score(model, X):
+        scaler = MinMaxScaler()
+        X_scaled = scaler.fit_transform(X) 
+        if hasattr(model, "predict_proba"):
+            proba = model.predict_proba(X_scaled)[0][1]
+            proba = np.clip(proba, 1e-3, 1 - 1e-3) 
+            return float(proba)
+        else:
+            return float(model.predict(X_scaled)[0])
+        
+    def make_predictions(input_dfs, customer_percentiles):
         probabilities = {
             'XGBoost': xgboost_model.predict_proba(input_dfs['basic'])[0][1],
-            'Naive Bayes': naive_bayes_model.predict_proba(input_dfs['basic'])[0][1],
+            'Naive Bayes': get_nb_score(naive_bayes_model, input_dfs['basic']),
             'Random Forest': random_forest_model.predict_proba(input_dfs['basic'])[0][1],
-            'Decision Tree': decision_tree_model.predict_proba(input_dfs['basic'])[0][1],
             'SVM': svm_model.predict_proba(input_dfs['basic'])[0][1],
-            'K-Nearest Neighbors': knn_model.predict_proba(input_dfs['basic'])[0][1],
             'XGBoost SMOTE': xgboost_SMOTE_model.predict_proba(input_dfs['smote'])[0][1],
             'XGBoost Feature Engineered': xgboost_featureEngineered_model.predict_proba(input_dfs['engineered'])[0][1],
+            'Voting Classifier': get_voting_score(voting_classifier_model, input_dfs['engineered'])
         }
 
         avg_probability = np.mean(list(probabilities.values()))
@@ -137,20 +162,20 @@ def main():
         Here is the customer's information:
         {input_dict}
         Here are the machine learning model's top 10 most important features for predicting churns:
-                Features    |    Importance
+          Features         |    Importance
         ---------------------------------------
-          CreditScore      |    0.035005
-          Age              |    0.109550
-          Tenure           |    0.030054
-          Balance          |    0.052786
-          NumOfProducts    |    0.323888
-          HasCrCard       |    0.031940
-          IsActiveMember   |    0.164146
-          EstimatedSalary  |    0.032655
-          Geography_France |    0.046463
-          Geography_Germany|    0.091373
-          Geography_Spain  |    0.036855
-          Gender_Female    |    0.045283
+          CreditScore      |    0.039948
+          Age              |    0.093195
+          Tenure           |    0.038620
+          Balance          |    0.052420
+          NumOfProducts    |    0.354507
+          HasCrCard        |    0.040686
+          IsActiveMember   |    0.135773
+          EstimatedSalary  |    0.035773
+          Geography_Japan  |    0.042271
+          Geography_USA    |    0.068507
+       Geography_Australia |    0.040899
+          Gender_Female    |    0.057401
           Gender_Male      |    0.000000
 
         {pd.set_option('display.max_columns', None)}
@@ -181,7 +206,7 @@ def main():
         )
         return clean_response(raw_response.choices[0].message.content)
 
-    def generate_email(probability, input_dict, explanation, surname):
+    def generate_email(input_dict, explanation, surname):
         prompt = f"""
         # CONTEXT #
         You are a manager at XYZ Bank. You are responsible for ensuring customers stay with the bank and are incentivized with various offers.
@@ -248,14 +273,14 @@ def main():
         input_dfs_and_dict = prepare_input(credit_score, location, gender, age, tenure, balance, min_products, has_credit_card, is_active_member, estimated_salary)
 
         percentiles = calculate_percentiles(df, input_dfs_and_dict['dict'])
-        avg_probability = make_predictions(input_dfs_and_dict, input_dfs_and_dict['dict'], percentiles)
+        avg_probability = make_predictions(input_dfs_and_dict, percentiles)
 
-        explanation = explain_prediction(avg_probability, input_dfs_and_dict['dict'], selected_customer["Surname"])
+        explanation = explain_prediction(avg_probability, input_dfs_and_dict['dict'], selected_surname)
         st.markdown("---")
         st.markdown("## Explanation of Prediction")
         st.markdown(explanation)
 
-        email = generate_email(avg_probability, input_dfs_and_dict['dict'], explanation, selected_customer["Surname"])
+        email = generate_email(input_dfs_and_dict['dict'], explanation, selected_surname)
         st.markdown("---")
         st.markdown("## Personalized Email")
         st.markdown(email)
@@ -266,6 +291,7 @@ if __name__ == "__main__":
 
     if st.session_state.page == "homepage":
         main()
+        
     elif st.session_state.page == "churn_prediction":
         import main_dashboard
         main_dashboard.main()
