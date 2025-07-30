@@ -1,7 +1,7 @@
 # Bank Customer Churn Predictor
 
 ## Architecture
-![Screenshot 2025-07-07 221306](https://github.com/user-attachments/assets/c4c2474b-dc7c-42cb-9820-05627cb35349)
+<img width="1221" height="828" alt="image" src="https://github.com/user-attachments/assets/0134b4fc-7d84-4eaf-aea4-5eef61e87569" />
 
 ## Description + stats
 - Bank customer churn prediction application utilizing:
@@ -16,7 +16,7 @@
 | XGBoost Classifier                   | 84.25%     |
 | XGBoost + SMOTE Classifier           | 83.87%     |
 | Voting Classifier                    | 83.63%     |
-| Mistral Saba 24B LLM [OpenAI]        | —          |
+| Qwen3 32B LLM [OpenAI]               | —          |
 
 - It ingests <code>4000</code> entries to predict churn risk with visual insights, AI-generated explanations and emails.
 
