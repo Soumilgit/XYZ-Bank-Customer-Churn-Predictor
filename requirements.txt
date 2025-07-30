@@ -7,3 +7,4 @@ plotly
 openai
 requests
 supabase
+Pillow

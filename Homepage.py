@@ -121,7 +121,16 @@ def main():
             margin-top: 2rem;
             color: #7f8c8d;
             font-size: 1.45rem;
-            border-top: 2px solid white;
+            border-top: 2px solid;
+            border-color: inherit;
+        }
+  
+        [data-theme="light"] .footer {
+            border-color: #2c3e50;
+        }
+   
+        [data-theme="dark"] .footer {
+            border-color: #ffffff;
         }
         </style>
         """,
@@ -181,11 +190,15 @@ def main():
         is_authenticated = st.session_state.get("authenticated", False)
 
         if is_authenticated:
-            if st.button("Launch Churn Prediction Tool", key="churn_button"):
+            if st.button("🔄 Launch Churn Prediction Tool", key="churn_button"):
                 st.session_state.page = "Dashboard"
+                st.rerun()
+            if st.button("📈 Launch Graphs Dashboard", key="graphs_button"):
+                st.session_state.page = "Graphs"
                 st.rerun()
         else:
             st.button("🔒 Log in to access Churn Tool", disabled=True)
+            st.button("🔒 Log in to access Churn Graphs", disabled=True)
 
     st.markdown("""
     <div class="footer">

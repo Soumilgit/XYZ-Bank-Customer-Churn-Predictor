@@ -3,6 +3,7 @@ import Homepage
 import auth
 import main_dashboard as dashboard
 import base64
+import graphs 
 import utils as ut
 import streamlit.components.v1 as components
 
@@ -92,6 +93,8 @@ if st.session_state["authenticated"]:
         set_page("Homepage")
     if st.sidebar.button("📊 DASHBOARD", key="go_dashboard"):
         set_page("Dashboard")
+    if st.sidebar.button("📈 GRAPHS", key="go_graphs"):
+        set_page("Graphs")
     if st.sidebar.button("🚪 LOGOUT", key="logout"):
         st.session_state["authenticated"] = False
         st.session_state["user"] = None
@@ -126,6 +129,9 @@ if st.session_state["page"] == "Homepage":
 elif st.session_state["page"] == "Dashboard":
     if st.session_state["authenticated"]:
         dashboard.main()
+elif st.session_state["page"] == "Graphs":
+    if st.session_state["authenticated"]:
+        graphs.main()
 
 elif st.session_state["page"] == "Auth":
     auth.main()
