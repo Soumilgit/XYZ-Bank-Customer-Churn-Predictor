@@ -78,7 +78,7 @@ def add_sidebar_image(image_file):
     )
 
 try:
-    add_sidebar_image('sidebar.jpeg')
+    add_sidebar_image('images/sidebar.jpeg')
 except:
     st.sidebar.markdown("<div class='sidebar-title' style='font-size: 24px; font-weight: bold;'>☰ Navigation</div>", unsafe_allow_html=True)
 

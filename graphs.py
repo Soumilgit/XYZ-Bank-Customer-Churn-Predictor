@@ -35,14 +35,14 @@ def apply_transparent_styles():
         
         /* Dark mode image adjustments - exclude sidebar specifically */
         @media (prefers-color-scheme: dark) {
-            img:not([src*="sidebar.jpeg"]):not([alt*="sidebar"]) {
+            img:not([src*="images/sidebar.jpeg"]):not([alt*="sidebar"]) {
                 filter: invert(1) hue-rotate(180deg);
                 background-color: black !important;
             }
             
             /* Explicitly ensure sidebar image stays normal */
             [data-testid="stSidebar"] img,
-            [src*="sidebar.jpeg"] {
+            [src*="images/sidebar.jpeg"] {
                 filter: none !important;
                 background-color: transparent !important;
             }
@@ -53,7 +53,7 @@ def apply_transparent_styles():
 def process_image(image_path, dark_mode=False, custom_width=None):
     """Process image to ensure proper display in both light and dark modes"""
     try:
-        if "sidebar.jpeg" in image_path:
+        if "images/sidebar.jpeg" in image_path:
             return Image.open(image_path)
             
         img = Image.open(image_path)
@@ -83,8 +83,8 @@ def process_image(image_path, dark_mode=False, custom_width=None):
 def display_image(image_path, title):
     try:
         dark_mode = st.get_option("theme.base") == "dark" if st.get_option("theme.base") else False
-        if "output-5.png" in image_path:
-            adjacent_img_path = "output-4.png" 
+        if "images/output-5.png" in image_path:
+            adjacent_img_path = "images/output-4.png" 
             adjacent_img = Image.open(adjacent_img_path)
             custom_width = adjacent_img.size[0]  
             
@@ -105,12 +105,12 @@ def main():
     st.title("Customer Analytics Visualizations")
     st.markdown("Key insights from customer data")
     images = [
-        {"path": "output-1.png", "title": "Age Distribution"},
-        {"path": "output-2.png", "title": "Credit Score vs Age"},
-        {"path": "output-3.png", "title": "Balance Distribution by Churn"},
-        {"path": "output-4.png", "title": "Credit Score Distribution by Churn"},
-        {"path": "output-5.png", "title": "Importance vs Features"},
-        {"path": "output.png", "title": "Distribution of Churn"}
+        {"path": "images/output-1.png", "title": "Age Distribution"},
+        {"path": "images/output-2.png", "title": "Credit Score vs Age"},
+        {"path": "images/output-3.png", "title": "Balance Distribution by Churn"},
+        {"path": "images/output-4.png", "title": "Credit Score Distribution by Churn"},
+        {"path": "images/output-5.png", "title": "Importance vs Features"},
+        {"path": "images/output.png", "title": "Distribution of Churn"}
     ]
     
     col1, col2 = st.columns(2)

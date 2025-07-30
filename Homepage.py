@@ -141,7 +141,7 @@ def main():
         st.markdown("""<div style="text-align: center; margin-bottom: 2rem;"><h1>XYZ Bank</h1></div>""", unsafe_allow_html=True)
 
         try:
-            add_header_image('background.png')
+            add_header_image('images/background.png')
         except:
             st.markdown("""<div style="text-align: center; margin-bottom: 2rem;"><h1>XYZ Bank</h1></div>""", unsafe_allow_html=True)
 
