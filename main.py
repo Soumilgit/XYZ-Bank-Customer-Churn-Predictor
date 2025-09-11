@@ -151,7 +151,7 @@ if st.session_state["page"] == "Homepage":
             <div style="background-color: #f8d7da; color: #721c24; padding: 6px 8px;
             border-radius: 6px; font-size: 21px; border-left: 6px solid #f5c6cb;
             margin-bottom: 18px; width: 90%;">
-                📢 <strong>Use '≫', top-left, to open sidebar via mobile.</strong>
+                📢 <strong>Click on half-hidden, top-left blue box to open sidebar via mobile.</strong>
             </div>
             """, unsafe_allow_html=True)
     Homepage.main()
