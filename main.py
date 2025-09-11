@@ -6,6 +6,7 @@ import base64
 import graphs 
 import utils as ut
 import streamlit.components.v1 as components
+import pure_python_auth as ppa
 
 # Page Config
 st.set_page_config(
@@ -15,6 +16,20 @@ st.set_page_config(
     initial_sidebar_state="expanded",
     menu_items={}
 )
+
+# Hide GitHub icon and other Streamlit branding
+st.markdown("""
+<style>
+.css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
+.styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
+.viewerBadge_text__1JaDK {
+    display: none;
+}
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
 
 ut.apply_sidebar_styles()
 
@@ -58,6 +73,9 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+# Initialize persistent authentication
+ppa.init_persistent_auth()
 
 #Init Session ----
 if "authenticated" not in st.session_state:
@@ -107,8 +125,7 @@ if st.session_state["authenticated"]:
     if st.sidebar.button("Detailed Insight Visualizations", key="go_graphs"):
         set_page("Graphs")
     if st.sidebar.button("Session Termination Process" + " ", key="logout"):
-        st.session_state["authenticated"] = False
-        st.session_state["user"] = None
+        ppa.logout_user()
         set_page("Auth")
     st.sidebar.markdown("</div>", unsafe_allow_html=True)  # Close container
 else:

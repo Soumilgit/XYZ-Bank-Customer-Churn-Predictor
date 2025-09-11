@@ -4,6 +4,7 @@ import requests
 import re
 from datetime import datetime
 from supabase import create_client
+import pure_python_auth as ppa
 
 import utils as ut
 ut.apply_sidebar_styles()
@@ -131,8 +132,8 @@ def login_signup_interface():
         if st.button("Login"):
             success, name = verify_login(email, password)
             if success:
-                st.session_state["authenticated"] = True
-                st.session_state["user"] = name
+                # Use persistent authentication
+                ppa.login_user(email, name)
                 st.success(f"Welcome back, {name}!")
                 st.rerun()
             else:
