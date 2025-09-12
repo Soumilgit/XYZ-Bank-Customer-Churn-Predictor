@@ -9,17 +9,14 @@ import pure_python_auth as ppa
 import utils as ut
 ut.apply_sidebar_styles()
 
-# Supabase Init
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
 SUPABASE_SERVICE_ROLE_KEY = st.secrets["SUPABASE_SERVICE_ROLE_KEY"]
 supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-# EmailJS Secrets
 EMAILJS_SERVICE_ID = st.secrets["EMAILJS_SERVICE_ID"]
 EMAILJS_TEMPLATE_ID = st.secrets["EMAILJS_TEMPLATE_ID"]
 EMAILJS_PUBLIC_KEY = st.secrets["EMAILJS_PUBLIC_KEY"]
 
-# PASSWORD UTILS
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
@@ -27,7 +24,6 @@ def is_valid_password(password):
     pattern = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$"
     return re.match(pattern, password)
 
-# DB HELPERS via Supabase
 def user_exists(email):
     result = supabase.table("users").select("email").eq("email", email).execute()
     return bool(result.data)
@@ -51,7 +47,6 @@ def verify_login(email, password):
         return True, result.data[0]["name"]
     return False, None
 
-# EMAILJS FUNCTION
 def send_email(title, name, email, message):
     try:
         payload = {
@@ -90,7 +85,6 @@ def send_reset_email(email):
         message=f"Password reset request for: {email}"
     )
 
-# REGISTER USER
 def register_user(email, name, password):
     if user_exists(email):
         return False, "Email already exists."
@@ -101,7 +95,6 @@ def register_user(email, name, password):
     send_welcome_email(name, email)
     return True, "Registration successful!"
 
-# RESET PASSWORD
 def forgot_password_flow():
     st.subheader("🔁 Forgot Password?")
     email = st.text_input("Enter your registered email", key="forgot_email")
@@ -120,7 +113,6 @@ def forgot_password_flow():
             send_reset_email(email)
             st.success("✅ Password reset successful!")
 
-# LOGIN/SIGNUP UI
 def login_signup_interface():
     st.markdown("## 🔐 Login or Sign Up")
     tabs = st.tabs(["Login", "Sign Up", "Forgot Password?"])
@@ -132,7 +124,6 @@ def login_signup_interface():
         if st.button("Login"):
             success, name = verify_login(email, password)
             if success:
-                # Use persistent authentication
                 ppa.login_user(email, name)
                 st.success(f"Welcome back, {name}!")
                 st.rerun()
@@ -155,7 +146,6 @@ def login_signup_interface():
     with tabs[2]:
         forgot_password_flow()
 
-# MAIN ENTRY
 def main():
     if "authenticated" not in st.session_state:
         st.session_state["authenticated"] = False
@@ -179,7 +169,7 @@ def main():
             st.session_state["post_login_hint_shown"] = True
             st.markdown("""
             <div class="zoom-box-login">
-                🚀 <strong>Use '≫', top-left, to access dashboard/logout.</strong>
+                🚀 <strong>Tap halved top blue box to access sidebar.</strong>
             </div>
             <style>
             .zoom-box-login {

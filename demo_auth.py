@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
-"""
-Demo script showing persistent authentication in action
-"""
 
 import streamlit as st
 import simple_auth as sa
 
-# Page config
 st.set_page_config(
     page_title="Auth Demo",
     page_icon="🔐",
     layout="centered"
 )
 
-# Initialize authentication
 sa.init_auth_restore()
 sa.check_persistent_auth()
 sa.handle_auth_restore()
@@ -21,7 +16,6 @@ sa.handle_auth_restore()
 st.title("🔐 Persistent Authentication Demo")
 st.markdown("This demo shows how persistent authentication works in your Streamlit app.")
 
-# Show current authentication status
 st.subheader("Current Status")
 is_auth = sa.is_authenticated()
 user = sa.get_current_user()
@@ -31,7 +25,6 @@ if is_auth:
 else:
     st.warning("❌ Not logged in")
 
-# Demo controls
 st.subheader("Demo Controls")
 
 col1, col2 = st.columns(2)
@@ -48,7 +41,6 @@ with col2:
         st.success("Logout successful! Refresh the page to test.")
         st.rerun()
 
-# Instructions
 st.subheader("How to Test Persistent Authentication")
 
 st.markdown("""
@@ -64,7 +56,6 @@ st.markdown("""
 - If data is expired (>7 days), it's automatically cleared
 """)
 
-# Show localStorage data (for debugging)
 st.subheader("Debug Info")
 st.markdown("""
 **To see localStorage data:**
@@ -74,6 +65,5 @@ st.markdown("""
 4. Check the console for authentication logs
 """)
 
-# Footer
 st.markdown("---")
 st.markdown("**Note:** This is a demo. In your actual app, authentication is handled through the Supabase database.")

@@ -1,24 +1,19 @@
 #!/usr/bin/env python3
-"""
-Test for pure Python persistent authentication
-"""
+
 
 import streamlit as st
 import pure_python_auth as ppa
 
-# Page config
 st.set_page_config(
     page_title="Pure Auth Test",
     page_icon="🔐",
     layout="centered"
 )
 
-# Initialize authentication
 ppa.init_persistent_auth()
 
 st.title("🔐 Pure Python Auth Test")
 
-# Show current status
 st.subheader("Current Status")
 is_auth = ppa.is_authenticated()
 user = ppa.get_current_user()
@@ -28,7 +23,6 @@ if is_auth:
 else:
     st.warning("❌ Not logged in")
 
-# Test buttons
 st.subheader("Test Controls")
 
 col1, col2 = st.columns(2)
@@ -45,7 +39,6 @@ with col2:
         st.success("Logged out!")
         st.rerun()
 
-# Instructions
 st.subheader("Instructions")
 st.markdown("""
 1. Click "Login" to log in
@@ -57,11 +50,9 @@ st.markdown("""
 **This approach uses a local file to store auth data.**
 """)
 
-# Debug info
 st.subheader("Debug Info")
 st.write("Session State:", dict(st.session_state))
 
-# Show auth file contents
 import os
 if os.path.exists("auth_data.json"):
     import json

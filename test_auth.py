@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-"""
-Test script for persistent authentication functionality
-"""
 
 import streamlit as st
 import simple_auth as sa

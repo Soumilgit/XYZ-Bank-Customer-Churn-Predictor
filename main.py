@@ -31,13 +31,12 @@ header {visibility: hidden;}
 
 ut.apply_sidebar_styles()
 
-# CSS: Sidebar behavior & responsiveness
 st.markdown("""
 <style>
 @media (max-width: 768px) {
     [data-testid="stSidebar"] {
         transform: translateX(-100%);
-        transition: transform 300ms ease-in-out;
+        transition: transform 150ms ease-in-out;
         position: fixed;
         z-index: 100;
         width: 270px !important;
@@ -62,24 +61,25 @@ st.markdown("""
         justify-content: flex-start !important;
         padding-left: 1rem !important;
     }
-            [data-testid="stSidebar"] {
-    padding-top: 3.5rem !important;
-}
+    [data-testid="stSidebar"] {
+        padding-top: 3.5rem !important;
+    }
     .main .block-container {
         padding-top: 2rem !important;
+    }
+    
+    [data-testid="stSidebar"]:not([aria-expanded="true"]) {
+        transform: translateX(-100%) !important;
     }
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize persistent authentication
 ppa.init_persistent_auth()
 
-#Init Session ----
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 
-# Check for URL parameters to maintain page state on refresh (essential for Streamlit Cloud)
 query_params = st.query_params
 if "page" in query_params:
     st.session_state["page"] = query_params["page"]
@@ -87,17 +87,14 @@ elif "page" not in st.session_state:
     st.session_state["page"] = "Homepage"
     st.session_state["first_visit"] = True
 
-# Ensure page state is always valid
 if st.session_state.get("page") not in ["Homepage", "Dashboard", "Graphs", "Auth"]:
     st.session_state["page"] = "Homepage"
 
-# Trigger sidebar collapse on very first load on mobile
+st.session_state["force_sidebar_collapse"] = True
+
 if st.session_state.get("first_visit"):
-    st.session_state["force_sidebar_collapse"] = True
     del st.session_state["first_visit"]
 
-
-# Sidebar Image
 def add_sidebar_image(image_file):
     with open(image_file, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode()
@@ -117,11 +114,9 @@ try:
 except:
     st.sidebar.markdown("<div class='sidebar-title' style='font-size: 24px; font-weight: bold;'>☰ Navigation</div>", unsafe_allow_html=True)
 
-# Navigation Logic
 def set_page(target_page):
     st.session_state["page"] = target_page
     st.session_state["force_sidebar_collapse"] = True
-    # Update URL parameters to maintain page state on refresh (essential for Streamlit Cloud)
     st.query_params.page = target_page
     st.rerun()
 
@@ -134,6 +129,7 @@ if st.session_state["authenticated"]:
         set_page("Graphs")
     if st.sidebar.button("Session Termination Process" + " ", key="logout"):
         ppa.logout_user()
+        st.session_state["immediate_logout"] = True
         set_page("Auth")
     st.sidebar.markdown("</div>", unsafe_allow_html=True)  # Close container
 else:
@@ -143,13 +139,11 @@ else:
         set_page("Auth")
     st.sidebar.markdown("</div>", unsafe_allow_html=True) 
 
-# Debug info for Streamlit Cloud (remove in production)
 if st.session_state.get("debug_mode", False):
     st.sidebar.write(f"Current page: {st.session_state.get('page', 'None')}")
     st.sidebar.write(f"Query params: {dict(st.query_params)}")
     st.sidebar.write(f"Authenticated: {st.session_state.get('authenticated', False)}")
 
-# Page Routing
 if st.session_state["page"] == "Homepage":
     if not st.session_state["authenticated"]:
         st.markdown("""
@@ -180,17 +174,15 @@ elif st.session_state["page"] == "Graphs":
 elif st.session_state["page"] == "Auth":
     auth.main()
 
-# Inject Sidebar Collapse (mobile only)
 if st.session_state.get("force_sidebar_collapse"):
     components.html("""
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    function collapseSidebar() {
         const mq = window.matchMedia("(max-width: 768px)");
         if (mq.matches) {
             const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
             if (sidebar) {
                 sidebar.setAttribute("aria-expanded", "false");
-                // Ensure collapse control is properly styled
                 const collapseControl = window.parent.document.querySelector('[data-testid="collapsedControl"]');
                 if (collapseControl) {
                     collapseControl.style.marginTop = '0.5rem';
@@ -198,7 +190,39 @@ if st.session_state.get("force_sidebar_collapse"):
                 }
             }
         }
-    });
+    }
+    
+    collapseSidebar();
+    document.addEventListener('DOMContentLoaded', collapseSidebar);
+    setTimeout(collapseSidebar, 100);
     </script>
     """, height=0)
     del st.session_state["force_sidebar_collapse"]
+
+if st.session_state.get("immediate_logout"):
+    components.html("""
+    <script>
+    function collapseSidebarOnLogout() {
+        const mq = window.matchMedia("(max-width: 768px)");
+        if (mq.matches) {
+            const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+            if (sidebar) {
+                sidebar.setAttribute("aria-expanded", "false");
+                sidebar.style.transform = "translateX(-100%) !important";
+                sidebar.style.transition = "transform 150ms ease-in-out";
+                const collapseControl = window.parent.document.querySelector('[data-testid="collapsedControl"]');
+                if (collapseControl) {
+                    collapseControl.style.marginTop = '0.5rem';
+                    collapseControl.style.marginLeft = '0.5rem';
+                }
+            }
+        }
+    }
+    
+    collapseSidebarOnLogout();
+    setTimeout(collapseSidebarOnLogout, 50);
+    setTimeout(collapseSidebarOnLogout, 100);
+    setTimeout(collapseSidebarOnLogout, 200);
+    </script>
+    """, height=0)
+    del st.session_state["immediate_logout"]

@@ -286,12 +286,4 @@ def main():
         st.markdown(email)
 
 if __name__ == "__main__":
-    if "page" not in st.session_state:
-        st.session_state.page = "homepage"
-
-    if st.session_state.page == "homepage":
-        main()
-        
-    elif st.session_state.page == "churn_prediction":
-        import main_dashboard
-        main_dashboard.main()
+    main()
