@@ -194,11 +194,13 @@ def main():
                 if st.button("🔄 Launch Churn Prediction Tool", key="churn_button", 
                         use_container_width=True):
                     st.session_state.page = "Dashboard"
+                    st.query_params.page = "Dashboard"
                     st.rerun()
             with col2:
                 if st.button("📈 Launch Graphs Dashboard", key="graphs_button",
                         use_container_width=True):
                     st.session_state.page = "Graphs"
+                    st.query_params.page = "Graphs"
                     st.rerun()
         else:
             col1, col2 = st.columns(2)
