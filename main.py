@@ -8,7 +8,6 @@ import utils as ut
 import streamlit.components.v1 as components
 import pure_python_auth as ppa
 
-# Page Config
 st.set_page_config(
     page_title="XYZ Bank Analytics",
     page_icon="🔄", 
@@ -17,7 +16,6 @@ st.set_page_config(
     menu_items={}
 )
 
-# Hide GitHub icon and other Streamlit branding
 st.markdown("""
 <style>
 .css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
