@@ -4,7 +4,7 @@
 <img width="1221" height="828" alt="image" src="https://github.com/user-attachments/assets/0134b4fc-7d84-4eaf-aea4-5eef61e87569" />
 
 ## Description + stats
-- Bank customer churn prediction application utilizing:
+- A full-stack bank customer churn predictor application utilizing:
 
 | Name of model                        | Accuracy   |
 |--------------------------------------|------------|
