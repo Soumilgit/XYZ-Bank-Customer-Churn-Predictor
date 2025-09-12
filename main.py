@@ -79,9 +79,17 @@ ppa.init_persistent_auth()
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
 
-if "page" not in st.session_state:
+# Check for URL parameters to maintain page state on refresh (essential for Streamlit Cloud)
+query_params = st.query_params
+if "page" in query_params:
+    st.session_state["page"] = query_params["page"]
+elif "page" not in st.session_state:
     st.session_state["page"] = "Homepage"
     st.session_state["first_visit"] = True
+
+# Ensure page state is always valid
+if st.session_state.get("page") not in ["Homepage", "Dashboard", "Graphs", "Auth"]:
+    st.session_state["page"] = "Homepage"
 
 # Trigger sidebar collapse on very first load on mobile
 if st.session_state.get("first_visit"):
@@ -113,6 +121,8 @@ except:
 def set_page(target_page):
     st.session_state["page"] = target_page
     st.session_state["force_sidebar_collapse"] = True
+    # Update URL parameters to maintain page state on refresh (essential for Streamlit Cloud)
+    st.query_params.page = target_page
     st.rerun()
 
 if st.session_state["authenticated"]:
@@ -132,6 +142,12 @@ else:
     if st.sidebar.button("Access & Registration Gateway", key="go_auth"):
         set_page("Auth")
     st.sidebar.markdown("</div>", unsafe_allow_html=True) 
+
+# Debug info for Streamlit Cloud (remove in production)
+if st.session_state.get("debug_mode", False):
+    st.sidebar.write(f"Current page: {st.session_state.get('page', 'None')}")
+    st.sidebar.write(f"Query params: {dict(st.query_params)}")
+    st.sidebar.write(f"Authenticated: {st.session_state.get('authenticated', False)}")
 
 # Page Routing
 if st.session_state["page"] == "Homepage":
