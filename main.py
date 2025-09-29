@@ -51,9 +51,9 @@ st.markdown("""
         flex-direction: column !important;
         visibility: visible !important;
         opacity: 1 !important;
-        width: 21rem !important;
-        min-width: 21rem !important;
-        max-width: 21rem !important;
+        width: 16rem !important;
+        min-width: 16rem !important;
+        max-width: 16rem !important;
         left: 0px !important;
         right: auto !important;
         top: 0px !important;
@@ -68,7 +68,7 @@ st.markdown("""
     .css-17eq0hr.e1fqkh3o0 {
         transform: translateX(0px) !important;
         margin-left: 0px !important;
-        width: 21rem !important;
+        width: 16rem !important;
         display: flex !important;
     }
     
