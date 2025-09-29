@@ -5,6 +5,12 @@ def apply_sidebar_styles():
     st.markdown(
         """
         <style>
+        [data-testid="stSideb        /* Ensure column spacing */
+        div[data-testid="column"] {
+            padding: 0 0.5rem !important;
+        }
+        
+        
         [data-testid="stSidebarNav"] li a {
             background-color: #007BFF !important;
             color: white !important;
@@ -30,7 +36,7 @@ def add_header_image(image_file):
         encoded_string = base64.b64encode(image_file.read()).decode()
     st.markdown(
         f"""
-        <div style="display: flex; justify-content: center; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: center; margin-bottom: 0.5rem;">
             <img src="data:image/png;base64,{encoded_string}" style="max-height: 200px;">
         </div>
         """,
@@ -46,7 +52,7 @@ def main():
         .main-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 3rem;
+            padding: 0rem;
             border-radius: 15px;
             background-color: #ffffff;
             box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
@@ -55,19 +61,19 @@ def main():
             font-size: 2.2rem !important;
             color: #2c3e50;
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 0.65rem;
             font-weight: 700;
         }
         .subtitle {
             font-size: 1.8rem !important;
             color: #7f8c8d;
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 0.65rem;
             font-weight: 500;
         }
         .feature-card {
-            padding: 1.0rem;
-            margin: 1.0rem 0;
+            padding: 1.5rem;
+            margin: 0.75rem 0.3rem;
             border-radius: 12px;
             background-color: #f8f9fa;
             border-left: 4px solid #3498db;
@@ -95,12 +101,12 @@ def main():
             text-align: center;
             text-decoration: none;
             display: inline-block;
-            font-size: 4rem;
-            margin: 1rem 0;
+            font-size: 1rem;
+            margin: 1rem 0.3rem;
             cursor: pointer;
             border-radius: 4px;
             transition: all 0.3s;
-            width: 100%;
+            width: calc(100% - 0.4rem);
         }
         .stButton>button:hover {
             background-color: #2980b9;
@@ -132,13 +138,35 @@ def main():
         [data-theme="dark"] .footer {
             border-color: #ffffff;
         }
+        
+        /* Reduce gap between popups and content */
+        .main .block-container {
+            padding-top: -1rem !important;
+            padding-bottom: 0rem !important;
+            margin-top: -1rem !important;
+        }
+        
+        /* Force content up */
+        .stApp > div {
+            margin-top: -1rem !important;
+        }
+        
+        /* Add proper spacing between columns and feature cards */
+        div[data-testid="stVerticalBlock"] > div {
+            gap: 0.1rem !important;
+        }
+        
+        /* Ensure column spacing - match feature cards */
+        div[data-testid="column"] {
+            padding: 0 0.1rem !important;
+        }
         </style>
         """,
         unsafe_allow_html=True
     )
 
     with st.container():
-        st.markdown("""<div style="text-align: center; margin-bottom: 2rem;"><h1>XYZ Bank</h1></div>""", unsafe_allow_html=True)
+        st.markdown("""<div style="text-align: center; margin-bottom: 0rem; margin-top: 0rem;"><h1>XYZ Bank</h1></div>""", unsafe_allow_html=True)
 
         try:
             add_header_image('images/background.png')
@@ -163,7 +191,7 @@ def main():
                 st.markdown("""
                     <div class="feature-card">
                         <div class="feature-title">Churn Model</div>
-                        <div class="feature-desc">Spot customers at risk of leaving with our machine learning models.</div>
+                        <div class="feature-desc">Check churn risk with our smart machine learning models.</div>
                     </div>
                     """, unsafe_allow_html=True)
                 st.markdown("""
@@ -185,6 +213,9 @@ def main():
                         <div class="feature-desc">Track key indicators of customer satisfaction and engagement.</div>
                     </div>
                     """, unsafe_allow_html=True)
+
+        # Call-to-action text after the 4 boxes
+        st.markdown('<p class="subtitle" style="margin-top: 1.35rem;">Uncover insights. Boost customer loyalty.</p>', unsafe_allow_html=True)
 
         is_authenticated = st.session_state.get("authenticated", False)
 
