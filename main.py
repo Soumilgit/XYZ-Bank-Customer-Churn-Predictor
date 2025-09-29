@@ -33,6 +33,63 @@ ut.apply_sidebar_styles()
 
 st.markdown("""
 <style>
+/* Desktop styles - FORCE sidebar to always be visible with maximum specificity */
+@media (min-width: 769px) {
+    /* Target all possible sidebar states on desktop */
+    [data-testid="stSidebar"],
+    [data-testid="stSidebar"][aria-expanded="false"],
+    [data-testid="stSidebar"][aria-expanded="true"],
+    [data-testid="stSidebar"]:not([aria-expanded]),
+    .css-1d391kg,
+    .css-1cypcdb,
+    .css-17eq0hr,
+    section[data-testid="stSidebar"] {
+        transform: translateX(0px) !important;
+        margin-left: 0px !important;
+        position: relative !important;
+        display: flex !important;
+        flex-direction: column !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        width: 21rem !important;
+        min-width: 21rem !important;
+        max-width: 21rem !important;
+        left: 0px !important;
+        right: auto !important;
+        top: 0px !important;
+        height: auto !important;
+        z-index: auto !important;
+        
+    }
+    
+    /* Override any Streamlit collapse classes */
+    .css-1d391kg.e1fqkh3o0,
+    .css-1cypcdb.e1fqkh3o0,
+    .css-17eq0hr.e1fqkh3o0 {
+        transform: translateX(0px) !important;
+        margin-left: 0px !important;
+        width: 21rem !important;
+        display: flex !important;
+    }
+    
+    /* Force sidebar content to be visible */
+    [data-testid="stSidebar"] > div,
+    [data-testid="stSidebar"] .css-1d391kg > div,
+    [data-testid="stSidebar"] .element-container {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Hide collapse button on desktop */
+    [data-testid="collapsedControl"],
+    .css-1rs6os,
+    .css-vk3wp9 {
+        display: none !important;
+    }
+}
+
+/* Mobile styles */
 @media (max-width: 768px) {
     [data-testid="stSidebar"] {
         transform: translateX(-100%);
@@ -177,24 +234,59 @@ elif st.session_state["page"] == "Auth":
 if st.session_state.get("force_sidebar_collapse"):
     components.html("""
     <script>
-    function collapseSidebar() {
+    function handleSidebarResponsive() {
         const mq = window.matchMedia("(max-width: 768px)");
+        
+        // Find sidebar with multiple selectors
+        let sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]') ||
+                     window.parent.document.querySelector('.css-1d391kg') ||
+                     window.parent.document.querySelector('section[data-testid="stSidebar"]');
+        
+        const collapseControl = window.parent.document.querySelector('[data-testid="collapsedControl"]');
+        
         if (mq.matches) {
-            const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+            // Mobile view - collapse sidebar
             if (sidebar) {
                 sidebar.setAttribute("aria-expanded", "false");
-                const collapseControl = window.parent.document.querySelector('[data-testid="collapsedControl"]');
                 if (collapseControl) {
                     collapseControl.style.marginTop = '0.5rem';
                     collapseControl.style.marginLeft = '0.5rem';
+                    collapseControl.style.setProperty('display', 'flex', 'important');
+                }
+            }
+        } else {
+            // Desktop view - FORCE sidebar to be visible with maximum strength
+            if (sidebar) {
+                sidebar.setAttribute("aria-expanded", "true");
+                sidebar.removeAttribute("aria-hidden");
+                
+                // Use setProperty with important flag for maximum override strength
+                sidebar.style.setProperty('transform', 'translateX(0px)', 'important');
+                sidebar.style.setProperty('display', 'flex', 'important');
+                sidebar.style.setProperty('visibility', 'visible', 'important');
+                sidebar.style.setProperty('opacity', '1', 'important');
+                sidebar.style.setProperty('width', '21rem', 'important');
+                sidebar.style.setProperty('margin-left', '0px', 'important');
+                sidebar.style.setProperty('position', 'relative', 'important');
+                
+                if (collapseControl) {
+                    collapseControl.style.setProperty('display', 'none', 'important');
                 }
             }
         }
     }
     
-    collapseSidebar();
-    document.addEventListener('DOMContentLoaded', collapseSidebar);
-    setTimeout(collapseSidebar, 100);
+    // Listen for viewport changes
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    mediaQuery.addListener(handleSidebarResponsive);
+    
+    // Execute multiple times with delays to catch any timing issues
+    handleSidebarResponsive();
+    document.addEventListener('DOMContentLoaded', handleSidebarResponsive);
+    setTimeout(handleSidebarResponsive, 50);
+    setTimeout(handleSidebarResponsive, 150);
+    setTimeout(handleSidebarResponsive, 300);
+    setTimeout(handleSidebarResponsive, 500);
     </script>
     """, height=0)
     del st.session_state["force_sidebar_collapse"]
@@ -202,27 +294,156 @@ if st.session_state.get("force_sidebar_collapse"):
 if st.session_state.get("immediate_logout"):
     components.html("""
     <script>
-    function collapseSidebarOnLogout() {
+    function handleSidebarOnLogout() {
         const mq = window.matchMedia("(max-width: 768px)");
+        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        const collapseControl = window.parent.document.querySelector('[data-testid="collapsedControl"]');
+        
         if (mq.matches) {
-            const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+            // Mobile view - collapse sidebar
             if (sidebar) {
                 sidebar.setAttribute("aria-expanded", "false");
-                sidebar.style.transform = "translateX(-100%) !important";
+                sidebar.style.transform = "translateX(-100%)";
                 sidebar.style.transition = "transform 150ms ease-in-out";
-                const collapseControl = window.parent.document.querySelector('[data-testid="collapsedControl"]');
                 if (collapseControl) {
                     collapseControl.style.marginTop = '0.5rem';
                     collapseControl.style.marginLeft = '0.5rem';
                 }
             }
+        } else {
+            // Desktop view - keep sidebar visible even after logout
+            if (sidebar) {
+                sidebar.style.transform = "translateX(0)";
+                sidebar.style.display = "block";
+                sidebar.style.visibility = "visible";
+                sidebar.style.opacity = "1";
+                sidebar.setAttribute("aria-expanded", "true");
+                if (collapseControl) {
+                    collapseControl.style.marginTop = '';
+                    collapseControl.style.marginLeft = '';
+                }
+            }
         }
     }
     
-    collapseSidebarOnLogout();
-    setTimeout(collapseSidebarOnLogout, 50);
-    setTimeout(collapseSidebarOnLogout, 100);
-    setTimeout(collapseSidebarOnLogout, 200);
+    handleSidebarOnLogout();
+    setTimeout(handleSidebarOnLogout, 50);
+    setTimeout(handleSidebarOnLogout, 100);
+    setTimeout(handleSidebarOnLogout, 200);
     </script>
     """, height=0)
     del st.session_state["immediate_logout"]
+
+# AGGRESSIVE Global sidebar monitor - ensures sidebar NEVER disappears on desktop
+components.html("""
+<script>
+function aggressiveSidebarMonitor() {
+    const mq = window.matchMedia("(max-width: 768px)");
+    
+    function forceDesktopSidebarVisible() {
+        if (!mq.matches) { // Desktop view only
+            // Get all possible sidebar selectors
+            const sidebarSelectors = [
+                '[data-testid="stSidebar"]',
+                '.css-1d391kg',
+                'section[data-testid="stSidebar"]',
+                '.css-1cypcdb',
+                '.css-17eq0hr'
+            ];
+            
+            let sidebar = null;
+            for (let selector of sidebarSelectors) {
+                sidebar = window.parent.document.querySelector(selector);
+                if (sidebar) break;
+            }
+            
+            if (sidebar) {
+                // FORCE all possible properties to make sidebar visible
+                sidebar.style.setProperty('transform', 'translateX(0px)', 'important');
+                sidebar.style.setProperty('margin-left', '0px', 'important');
+                sidebar.style.setProperty('display', 'flex', 'important');
+                sidebar.style.setProperty('flex-direction', 'column', 'important');
+                sidebar.style.setProperty('visibility', 'visible', 'important');
+                sidebar.style.setProperty('opacity', '1', 'important');
+                sidebar.style.setProperty('width', '21rem', 'important');
+                sidebar.style.setProperty('min-width', '21rem', 'important');
+                sidebar.style.setProperty('max-width', '21rem', 'important');
+                sidebar.style.setProperty('left', '0px', 'important');
+                sidebar.style.setProperty('position', 'relative', 'important');
+                sidebar.style.setProperty('z-index', 'auto', 'important');
+                
+                // Force aria-expanded to true
+                sidebar.setAttribute("aria-expanded", "true");
+                sidebar.removeAttribute("aria-hidden");
+                
+                // Make sure all child elements are visible
+                const sidebarChildren = sidebar.querySelectorAll('*');
+                sidebarChildren.forEach(child => {
+                    if (child.style.display === 'none') {
+                        child.style.setProperty('display', 'block', 'important');
+                    }
+                    if (child.style.visibility === 'hidden') {
+                        child.style.setProperty('visibility', 'visible', 'important');
+                    }
+                });
+                
+                // Hide collapse controls on desktop
+                const collapseControl = window.parent.document.querySelector('[data-testid="collapsedControl"]');
+                if (collapseControl) {
+                    collapseControl.style.setProperty('display', 'none', 'important');
+                }
+                
+                // Remove any Streamlit collapse classes
+                sidebar.classList.remove('css-1rs6os', 'css-vk3wp9');
+            }
+        }
+    }
+    
+    // Initial aggressive fix
+    forceDesktopSidebarVisible();
+    
+    // Monitor viewport changes
+    mq.addListener(forceDesktopSidebarVisible);
+    
+    // Very frequent checks to catch any sidebar hiding attempts
+    setInterval(forceDesktopSidebarVisible, 100);
+    
+    // Monitor for DOM changes that might affect sidebar
+    const observer = new MutationObserver(function(mutations) {
+        if (!mq.matches) { // Only on desktop
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' || mutation.type === 'childList') {
+                    forceDesktopSidebarVisible();
+                }
+            });
+        }
+    });
+    
+    // Observe the entire document for changes
+    observer.observe(window.parent.document, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+        attributeFilter: ['style', 'class', 'aria-expanded', 'aria-hidden']
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        setTimeout(forceDesktopSidebarVisible, 50);
+        setTimeout(forceDesktopSidebarVisible, 200);
+    });
+    
+    // Handle orientation change (mobile to desktop)
+    window.addEventListener('orientationchange', function() {
+        setTimeout(forceDesktopSidebarVisible, 300);
+    });
+}
+
+// Start the aggressive monitor
+aggressiveSidebarMonitor();
+
+// Also ensure it runs after page loads
+document.addEventListener('DOMContentLoaded', aggressiveSidebarMonitor);
+setTimeout(aggressiveSidebarMonitor, 1000);
+</script>
+""", height=0)
