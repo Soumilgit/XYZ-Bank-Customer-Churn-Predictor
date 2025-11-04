@@ -1,4 +1,4 @@
-import streamlit as st
+﻿import streamlit as st
 import Homepage
 import auth
 import main_dashboard as dashboard
@@ -91,42 +91,107 @@ st.markdown("""
 
 /* Mobile styles */
 @media (max-width: 768px) {
+    /* Sidebar container - completely off-screen when collapsed */
     [data-testid="stSidebar"] {
-        transform: translateX(-100%);
-        transition: transform 150ms ease-in-out;
         position: fixed;
         z-index: 100;
         width: 270px !important;
         height: 100vh !important;
         top: 0 !important;
-        left: 0 !important;
+        left: -270px !important;
         padding: 1rem !important;
+        transition: left 150ms ease-in-out;
     }
+    
+    /* When expanded - slide fully into view */
     [data-testid="stSidebar"][aria-expanded="true"] {
-        transform: translateX(0);
+        left: 0 !important;
     }
+    
+    /* Dark mode - dark grey/black background */
+    @media (prefers-color-scheme: dark) {
+        [data-testid="stSidebar"] {
+            background-color: #262730 !important;
+        }
+    }
+    
+    /* Light mode - white background */
+    @media (prefers-color-scheme: light) {
+        [data-testid="stSidebar"] {
+            background-color: #ffffff !important;
+        }
+    }
+    
+    /* When collapsed - make everything invisible */
+    [data-testid="stSidebar"]:not([aria-expanded="true"]) > div {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* When expanded - show everything normally */
+    [data-testid="stSidebar"][aria-expanded="true"] > div {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
+    }
+    
+    /* Hide Streamlit's default collapse button */
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
+    
+    /* Custom floating menu button - ALWAYS visible - SMALLER SIZE */
+    .custom-menu-btn {
+        position: fixed !important;
+        top: 0.5rem !important;
+        left: 0.5rem !important;
+        z-index: 9999 !important;
+        background: linear-gradient(135deg, #1f77b4 0%, #1557a0 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 6px !important;
+        padding: 0.4rem 0.6rem !important;
+        cursor: pointer !important;
+        box-shadow: 0 2px 8px rgba(31, 119, 180, 0.4) !important;
+        font-size: 0.85rem !important;
+        font-weight: bold !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.3rem !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .custom-menu-btn:hover {
+        transform: scale(1.05) !important;
+        box-shadow: 0 4px 12px rgba(31, 119, 180, 0.6) !important;
+    }
+    
+    .custom-menu-btn:active {
+        transform: scale(0.98) !important;
+    }
+    
+    /* Hide custom button when sidebar is open */
+    [data-testid="stSidebar"][aria-expanded="true"] ~ .stApp .custom-menu-btn {
+        display: none !important;
+    }
+    
     [data-testid="stSidebarResizer"] {
         display: none !important;
     }
+    
     [data-testid="stSidebar"] button {
         width: 100% !important;
         margin: 0.5rem 0 !important;
     }
-    [data-testid="collapsedControl"] {
-        margin-top: 34px !important;
-        display: flex !important;
-        justify-content: flex-start !important;
-        padding-left: 1rem !important;
-    }
+    
     [data-testid="stSidebar"] {
         padding-top: 3.5rem !important;
     }
+    
     .main .block-container {
         padding-top: 2rem !important;
-    }
-    
-    [data-testid="stSidebar"]:not([aria-expanded="true"]) {
-        transform: translateX(-100%) !important;
+        margin-left: 0 !important;
     }
 }
 </style>
@@ -174,6 +239,8 @@ except:
 def set_page(target_page):
     st.session_state["page"] = target_page
     st.session_state["force_sidebar_collapse"] = True
+    st.session_state["ensure_sidebar_clickable"] = True
+    st.session_state["collapse_sidebar_on_mobile"] = True  # New flag to collapse sidebar after navigation
     st.query_params.page = target_page
     st.rerun()
 
@@ -216,7 +283,7 @@ if st.session_state["page"] == "Homepage":
             <div style="background-color: #f8d7da; color: #721c24; padding: 6px 8px;
             border-radius: 6px; font-size: 21px; border-left: 6px solid #f5c6cb;
             margin-bottom: 18px; width: 90%;">
-                📢 <strong>Tap halved top blue box for mobile's sidebar.</strong>
+                📢 <strong>Tap 'Menu', then halved top blue box for mobile's sidebar.</strong>
             </div>
             """, unsafe_allow_html=True)
     Homepage.main()
@@ -245,14 +312,19 @@ if st.session_state.get("force_sidebar_collapse"):
         const collapseControl = window.parent.document.querySelector('[data-testid="collapsedControl"]');
         
         if (mq.matches) {
-            // Mobile view - collapse sidebar
+            // Mobile view - completely hide sidebar, show only blue button
             if (sidebar) {
-                sidebar.setAttribute("aria-expanded", "false");
-                if (collapseControl) {
-                    collapseControl.style.marginTop = '0.5rem';
-                    collapseControl.style.marginLeft = '0.5rem';
-                    collapseControl.style.setProperty('display', 'flex', 'important');
-                }
+                sidebar.removeAttribute("aria-expanded");
+                // Remove any inline styles that might interfere
+                sidebar.style.removeProperty('transform');
+                sidebar.style.removeProperty('margin-left');
+                sidebar.style.removeProperty('width');
+            }
+            if (collapseControl) {
+                // Ensure button is always visible and properly positioned
+                collapseControl.style.setProperty('display', 'flex', 'important');
+                collapseControl.style.setProperty('opacity', '1', 'important');
+                collapseControl.style.setProperty('visibility', 'visible', 'important');
             }
         } else {
             // Desktop view - FORCE sidebar to be visible with maximum strength
@@ -300,24 +372,21 @@ if st.session_state.get("immediate_logout"):
         const collapseControl = window.parent.document.querySelector('[data-testid="collapsedControl"]');
         
         if (mq.matches) {
-            // Mobile view - collapse sidebar by setting aria-expanded only
-            // Let CSS handle the transform/transition for consistent behavior
+            // Mobile view - hide sidebar completely, only blue button visible
             if (sidebar) {
-                sidebar.setAttribute("aria-expanded", "false");
-                // Removed inline styles to prevent conflicts with Streamlit's toggle
+                sidebar.removeAttribute("aria-expanded");
+                sidebar.style.removeProperty('transform');
+                sidebar.style.removeProperty('left');
             }
             if (collapseControl) {
-                collapseControl.style.marginTop = '0.5rem';
-                collapseControl.style.marginLeft = '0.5rem';
+                collapseControl.style.setProperty('display', 'flex', 'important');
             }
         } else {
             // Desktop view - keep sidebar visible even after logout
             if (sidebar) {
                 sidebar.setAttribute("aria-expanded", "true");
-                // Removed inline styles - let CSS handle desktop visibility
                 if (collapseControl) {
-                    collapseControl.style.marginTop = '';
-                    collapseControl.style.marginLeft = '';
+                    collapseControl.style.setProperty('display', 'none', 'important');
                 }
             }
         }
@@ -330,6 +399,89 @@ if st.session_state.get("immediate_logout"):
     </script>
     """, height=0)
     del st.session_state["immediate_logout"]
+
+# Reset sidebar state after login to fix toggle issue
+if st.session_state.get("reset_sidebar_on_login"):
+    components.html("""
+    <script>
+    function resetSidebarAfterLogin() {
+        const mq = window.matchMedia("(max-width: 768px)");
+        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        
+        if (mq.matches && sidebar) {
+            // Mobile: Reset to properly collapsed state
+            sidebar.removeAttribute("aria-expanded");
+            // Let Streamlit's default behavior take over
+        }
+    }
+    
+    resetSidebarAfterLogin();
+    setTimeout(resetSidebarAfterLogin, 100);
+    setTimeout(resetSidebarAfterLogin, 300);
+    </script>
+    """, height=0)
+    del st.session_state["reset_sidebar_on_login"]
+
+# Ensure sidebar remains clickable after navigation
+if st.session_state.get("ensure_sidebar_clickable"):
+    components.html("""
+    <script>
+    function ensureSidebarClickable() {
+        const mq = window.matchMedia("(max-width: 768px)");
+        
+        if (mq.matches) {
+            const menuBtn = window.parent.document.getElementById('customMenuButton');
+            
+            if (menuBtn) {
+                // Ensure custom menu button is visible and clickable
+                menuBtn.style.setProperty('display', 'flex', 'important');
+                menuBtn.style.setProperty('pointer-events', 'auto', 'important');
+                menuBtn.style.setProperty('visibility', 'visible', 'important');
+                menuBtn.style.setProperty('opacity', '1', 'important');
+            }
+        }
+    }
+    
+    ensureSidebarClickable();
+    setTimeout(ensureSidebarClickable, 100);
+    setTimeout(ensureSidebarClickable, 300);
+    setTimeout(ensureSidebarClickable, 500);
+    </script>
+    """, height=0)
+    del st.session_state["ensure_sidebar_clickable"]
+
+# Collapse sidebar on mobile after navigation
+if st.session_state.get("collapse_sidebar_on_mobile"):
+    components.html("""
+    <script>
+    function collapseSidebarAfterNavigation() {
+        const mq = window.matchMedia("(max-width: 768px)");
+        
+        if (mq.matches) {
+            const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+            const menuBtn = window.parent.document.getElementById('customMenuButton');
+            
+            if (sidebar) {
+                // Force sidebar to collapse
+                sidebar.setAttribute('aria-expanded', 'false');
+                sidebar.style.left = '-270px';
+            }
+            
+            if (menuBtn) {
+                // Show menu button
+                menuBtn.style.display = 'flex';
+            }
+        }
+    }
+    
+    collapseSidebarAfterNavigation();
+    setTimeout(collapseSidebarAfterNavigation, 50);
+    setTimeout(collapseSidebarAfterNavigation, 100);
+    setTimeout(collapseSidebarAfterNavigation, 200);
+    setTimeout(collapseSidebarAfterNavigation, 300);
+    </script>
+    """, height=0)
+    del st.session_state["collapse_sidebar_on_mobile"]
 
 # AGGRESSIVE Global sidebar monitor - ensures sidebar NEVER disappears on desktop
 components.html("""
@@ -442,5 +594,141 @@ aggressiveSidebarMonitor();
 // Also ensure it runs after page loads
 document.addEventListener('DOMContentLoaded', aggressiveSidebarMonitor);
 setTimeout(aggressiveSidebarMonitor, 1000);
+</script>
+""", height=0)
+
+# Inject custom menu button - RUNS AT THE END after all page content loads
+# Using current page + timestamp to force re-execution on every render
+import time
+menu_button_key = f"{st.session_state.get('page', 'default')}_{int(time.time() * 1000)}"
+
+components.html(f"""
+<script>
+// Unique execution ID: {menu_button_key}
+(function() {{
+    const parentDoc = window.parent.document;
+    
+    function createCustomMenuButton() {{
+        const mq = window.matchMedia("(max-width: 768px)");
+        if (!mq.matches) {{
+            // Desktop - remove button if it exists
+            const existingBtn = parentDoc.getElementById('customMenuButton');
+            if (existingBtn) existingBtn.remove();
+            return;
+        }}
+        
+        // Check if sidebar exists before creating button
+        const sidebar = parentDoc.querySelector('[data-testid="stSidebar"]');
+        if (!sidebar) {{
+            // Sidebar not ready yet, try again later
+            return;
+        }}
+        
+        // Mobile - check if button already exists
+        let btn = parentDoc.getElementById('customMenuButton');
+        let buttonAlreadyExisted = !!btn;
+        
+        if (!btn) {{
+            // Create button
+            btn = parentDoc.createElement('button');
+            btn.id = 'customMenuButton';
+            btn.style.cssText = `
+                position: fixed !important;
+                top: 0.5rem !important;
+                left: 0.5rem !important;
+                z-index: 9999 !important;
+                background: linear-gradient(135deg, #1f77b4 0%, #1557a0 100%) !important;
+                color: white !important;
+                border: none !important;
+                border-radius: 6px !important;
+                padding: 0.4rem 0.6rem !important;
+                cursor: pointer !important;
+                box-shadow: 0 2px 8px rgba(31, 119, 180, 0.4) !important;
+                font-size: 0.85rem !important;
+                font-weight: bold !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 0.3rem !important;
+                transition: all 0.2s ease !important;
+            `;
+            btn.innerHTML = '<span style="font-size: 1.2rem;">☰</span><span>Menu</span>';
+            
+            // Append to body
+            parentDoc.body.appendChild(btn);
+        }}
+        
+        // Always update button click handler (in case it was lost)
+        btn.onclick = function(e) {{
+            e.stopPropagation();
+            e.preventDefault();
+            const sidebar = parentDoc.querySelector('[data-testid="stSidebar"]');
+            if (sidebar) {{
+                // Force sidebar to expand
+                sidebar.setAttribute('aria-expanded', 'true');
+                sidebar.style.left = '0px';
+                btn.style.display = 'none';
+            }}
+        }};
+        
+        // Always update button visibility based on current sidebar state
+        const isExpanded = sidebar.getAttribute('aria-expanded') === 'true';
+        btn.style.display = isExpanded ? 'none' : 'flex';
+        
+        // Set up observers only once (when button is first created)
+        if (!buttonAlreadyExisted) {{
+            // Monitor sidebar state with MutationObserver
+            const observer = new MutationObserver(function(mutations) {{
+                const isExpanded = sidebar.getAttribute('aria-expanded') === 'true';
+                if (btn) {{
+                    btn.style.display = isExpanded ? 'none' : 'flex';
+                }}
+            }});
+            
+            observer.observe(sidebar, {{ 
+                attributes: true, 
+                attributeFilter: ['aria-expanded', 'style'] 
+            }});
+            
+            // Click outside to close - use capture phase
+            const clickOutsideHandler = function(e) {{
+                const sidebar = parentDoc.querySelector('[data-testid="stSidebar"]');
+                if (!sidebar) return;
+                
+                const isExpanded = sidebar.getAttribute('aria-expanded') === 'true';
+                const clickedInsideSidebar = sidebar.contains(e.target);
+                const clickedButton = btn && btn.contains(e.target);
+                
+                if (isExpanded && !clickedInsideSidebar && !clickedButton) {{
+                    sidebar.setAttribute('aria-expanded', 'false');
+                    sidebar.style.left = '-270px';
+                    if (btn) btn.style.display = 'flex';
+                }}
+            }};
+            
+            parentDoc.addEventListener('click', clickOutsideHandler, true);
+        }}
+    }}
+    
+    // Run immediately and repeatedly to ensure button appears and sidebar is ready
+    createCustomMenuButton();
+    setTimeout(createCustomMenuButton, 50);
+    setTimeout(createCustomMenuButton, 100);
+    setTimeout(createCustomMenuButton, 200);
+    setTimeout(createCustomMenuButton, 300);
+    setTimeout(createCustomMenuButton, 500);
+    setTimeout(createCustomMenuButton, 800);
+    setTimeout(createCustomMenuButton, 1000);
+    setTimeout(createCustomMenuButton, 1500);
+    setTimeout(createCustomMenuButton, 2000);
+    setTimeout(createCustomMenuButton, 3000);
+    
+    // Keep checking periodically in case of Streamlit re-renders
+    setInterval(function() {{
+        const mq = window.matchMedia("(max-width: 768px)");
+        if (mq.matches) {{
+            createCustomMenuButton();
+        }}
+    }}, 500);
+}})();
 </script>
 """, height=0)

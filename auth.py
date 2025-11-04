@@ -169,7 +169,7 @@ def main():
             st.session_state["post_login_hint_shown"] = True
             st.markdown("""
             <div class="zoom-box-login">
-                🚀 <strong>Tap halved top blue box to access sidebar.</strong>
+                🚀 <strong>Tap 'Menu', then halved top blue box to access sidebar.</strong>
             </div>
             <style>
             .zoom-box-login {

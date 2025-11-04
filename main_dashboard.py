@@ -139,15 +139,15 @@ def main():
         col1, col2 = st.columns(2)
         with col1:
             fig = ut.create_gauge_chart(avg_probability)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
             st.write(f"The customer has a {avg_probability:.2%} probability of churning.")
 
         with col2:
             fig_probs = ut.create_model_probability_chart(probabilities)
-            st.plotly_chart(fig_probs, use_container_width=True)
+            st.plotly_chart(fig_probs, width='stretch')
 
         percentile_chart = ut.create_percentile_bar_chart(customer_percentiles)
-        st.plotly_chart(percentile_chart, use_container_width=True)
+        st.plotly_chart(percentile_chart, width='stretch')
 
         return avg_probability
 
