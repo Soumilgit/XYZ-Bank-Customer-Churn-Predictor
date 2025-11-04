@@ -300,24 +300,21 @@ if st.session_state.get("immediate_logout"):
         const collapseControl = window.parent.document.querySelector('[data-testid="collapsedControl"]');
         
         if (mq.matches) {
-            // Mobile view - collapse sidebar
+            // Mobile view - collapse sidebar by setting aria-expanded only
+            // Let CSS handle the transform/transition for consistent behavior
             if (sidebar) {
                 sidebar.setAttribute("aria-expanded", "false");
-                sidebar.style.transform = "translateX(-100%)";
-                sidebar.style.transition = "transform 150ms ease-in-out";
-                if (collapseControl) {
-                    collapseControl.style.marginTop = '0.5rem';
-                    collapseControl.style.marginLeft = '0.5rem';
-                }
+                // Removed inline styles to prevent conflicts with Streamlit's toggle
+            }
+            if (collapseControl) {
+                collapseControl.style.marginTop = '0.5rem';
+                collapseControl.style.marginLeft = '0.5rem';
             }
         } else {
             // Desktop view - keep sidebar visible even after logout
             if (sidebar) {
-                sidebar.style.transform = "translateX(0)";
-                sidebar.style.display = "block";
-                sidebar.style.visibility = "visible";
-                sidebar.style.opacity = "1";
                 sidebar.setAttribute("aria-expanded", "true");
+                // Removed inline styles - let CSS handle desktop visibility
                 if (collapseControl) {
                     collapseControl.style.marginTop = '';
                     collapseControl.style.marginLeft = '';
