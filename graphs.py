@@ -93,7 +93,7 @@ def display_image(image_path, title):
             
         if img:
             st.markdown(f'<div class="graph-title">{title}</div>', unsafe_allow_html=True)
-            st.image(img, use_container_width=True)
+            st.image(img, width='stretch')
     except FileNotFoundError:
         st.error(f"Image not found: {image_path}")
 

@@ -75,6 +75,7 @@ def login_user(email, name):
     st.session_state["authenticated"] = True
     st.session_state["user"] = name
     st.session_state["user_email"] = email
+    st.session_state["reset_sidebar_on_login"] = True  # Flag to reset sidebar state
 
     save_auth_to_file(email, name)
     

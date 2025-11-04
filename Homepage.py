@@ -5,7 +5,7 @@ def apply_sidebar_styles():
     st.markdown(
         """
         <style>
-        [data-testid="stSideb        /* Ensure column spacing */
+        /* Ensure column spacing */
         div[data-testid="column"] {
             padding: 0 0.5rem !important;
         }
@@ -139,24 +139,14 @@ def main():
             border-color: #ffffff;
         }
         
-        /* Reduce gap between popups and content */
         .main .block-container {
-            padding-top: -1rem !important;
-            padding-bottom: 0rem !important;
-            margin-top: -1rem !important;
+            padding-bottom: 3rem !important;
         }
-        
-        /* Force content up */
-        .stApp > div {
-            margin-top: -1rem !important;
-        }
-        
-        /* Add proper spacing between columns and feature cards */
+
         div[data-testid="stVerticalBlock"] > div {
             gap: 0.1rem !important;
         }
-        
-        /* Ensure column spacing - match feature cards */
+
         div[data-testid="column"] {
             padding: 0 0.1rem !important;
         }
@@ -223,13 +213,13 @@ def main():
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("🔄 Launch Churn Prediction Tool", key="churn_button", 
-                        use_container_width=True):
+                        width='stretch'):
                     st.session_state.page = "Dashboard"
                     st.query_params.page = "Dashboard"
                     st.rerun()
             with col2:
                 if st.button("📈 Launch Graphs Dashboard", key="graphs_button",
-                        use_container_width=True):
+                        width='stretch'):
                     st.session_state.page = "Graphs"
                     st.query_params.page = "Graphs"
                     st.rerun()
@@ -237,10 +227,10 @@ def main():
             col1, col2 = st.columns(2)
             with col1:
                 st.button("🔒 Log in to access Churn Tool", disabled=True, 
-                        use_container_width=True)
+                        width='stretch')
             with col2:
                 st.button("🔒 Log in to access Churn Graphs", disabled=True,
-                        use_container_width=True)
+                        width='stretch')
 
     st.markdown("""
     <div class="footer">

@@ -2,9 +2,14 @@ import streamlit as st
 import hashlib
 import requests
 import re
+import html
 from datetime import datetime
 from supabase import create_client
 import pure_python_auth as ppa
+try:
+    import bcrypt
+except ImportError:
+    bcrypt = None
 
 import utils as ut
 ut.apply_sidebar_styles()
@@ -18,11 +23,34 @@ EMAILJS_TEMPLATE_ID = st.secrets["EMAILJS_TEMPLATE_ID"]
 EMAILJS_PUBLIC_KEY = st.secrets["EMAILJS_PUBLIC_KEY"]
 
 def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+        return hashlib.sha256(password.encode()).hexdigest()
+
+def is_valid_email(email):
+    """Validate email format"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) and len(email) <= 254
 
 def is_valid_password(password):
     pattern = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$"
     return re.match(pattern, password)
+
+def sanitize_name(name):
+    """Sanitize and validate name input to prevent XSS"""
+    if not name:
+        return None, "Name is required"
+    
+    # Escape HTML characters to prevent XSS
+    safe_name = html.escape(name.strip())
+    
+    # Length check
+    if len(safe_name) > 100:
+        return None, "Name too long (max 100 characters)"
+    
+    # Character validation (letters, spaces, hyphens, apostrophes, dots)
+    if not re.match(r"^[a-zA-Z\s\-\'\.]+$", safe_name):
+        return None, "Name contains invalid characters (only letters, spaces, hyphens, apostrophes allowed)"
+    
+    return safe_name, None
 
 def user_exists(email):
     result = supabase.table("users").select("email").eq("email", email).execute()
@@ -41,10 +69,31 @@ def update_password(email, new_password_hash):
     }).eq("email", email).execute()
 
 def verify_login(email, password):
-    hashed = hash_password(password)
-    result = supabase.table("users").select("*").eq("email", email).eq("password", hashed).execute()
-    if result.data:
-        return True, result.data[0]["name"]
+    result = supabase.table("users").select("*").eq("email", email).execute()
+    if not result.data:
+        return False, None
+
+    user_row = result.data[0]
+    stored_hash = user_row.get("password", "")
+    user_name = user_row.get("name")
+
+    if bcrypt and isinstance(stored_hash, str) and stored_hash.startswith("$2"):
+        try:
+            if bcrypt.checkpw(password.encode(), stored_hash.encode()):
+                return True, user_name
+        except ValueError:
+            pass
+
+    sha_hash = hashlib.sha256(password.encode()).hexdigest()
+    if stored_hash == sha_hash:
+        if bcrypt:
+            try:
+                new_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+                update_password(email, new_hash)
+            except Exception:
+                pass
+        return True, user_name
+
     return False, None
 
 def send_email(title, name, email, message):
@@ -86,13 +135,23 @@ def send_reset_email(email):
     )
 
 def register_user(email, name, password):
+    # Validate email
+    if not is_valid_email(email):
+        return False, "Invalid email format."
+    
     if user_exists(email):
         return False, "Email already exists."
+    
+    # Sanitize name (XSS protection)
+    safe_name, name_error = sanitize_name(name)
+    if name_error:
+        return False, name_error
+    
     if not is_valid_password(password):
         return False, "Password must be ≥8 characters, include upper/lowercase, digit & symbol."
 
-    add_user(email, name, hash_password(password))
-    send_welcome_email(name, email)
+    add_user(email, safe_name, hash_password(password))
+    send_welcome_email(safe_name, email)
     return True, "Registration successful!"
 
 def forgot_password_flow():
@@ -102,7 +161,9 @@ def forgot_password_flow():
     confirm_pass = st.text_input("Confirm new password", type="password", key="confirm_pass")
 
     if st.button("Reset Password"):
-        if not user_exists(email):
+        if not is_valid_email(email):
+            st.error("Invalid email format.")
+        elif not user_exists(email):
             st.error("Email not found.")
         elif new_pass != confirm_pass:
             st.error("Passwords do not match.")
@@ -151,6 +212,9 @@ def main():
         st.session_state["authenticated"] = False
 
     if st.session_state["authenticated"]:
+        # Sanitize username to prevent XSS
+        safe_username = html.escape(st.session_state.get('user', 'Unknown'))
+        
         st.markdown(f"""
         <div style="
             color: #155724;
@@ -161,7 +225,7 @@ def main():
             font-size: 26px;
             margin-bottom: 12px;
             font-weight: 500;">
-            🔓 Logged in as {st.session_state['user']}
+            🔓 Logged in as {safe_username}
         </div>
         """, unsafe_allow_html=True)
 
@@ -169,7 +233,7 @@ def main():
             st.session_state["post_login_hint_shown"] = True
             st.markdown("""
             <div class="zoom-box-login">
-                🚀 <strong>Tap halved top blue box to access sidebar.</strong>
+                🚀 <strong>Tap '>>' to access sidebar on mobile.</strong>
             </div>
             <style>
             .zoom-box-login {
