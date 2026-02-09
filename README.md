@@ -1,5 +1,7 @@
 # Bank Customer Churn Predictor
 
+**AI-powered machine learning application for predicting bank customer churn risk with visual analytics, automated insights, and personalized retention strategies.**
+
 ## Architecture
 <img width="1270" height="796" alt="architecture-1" src="https://github.com/user-attachments/assets/a13ff59b-4172-49b5-8483-a5d7431a591a" />
 
