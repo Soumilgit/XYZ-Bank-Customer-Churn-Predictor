@@ -1,8 +1,5 @@
 # Bank Customer Churn Predictor
 
-## Architecture
-<img width="1270" height="796" alt="architecture-1" src="https://github.com/user-attachments/assets/a13ff59b-4172-49b5-8483-a5d7431a591a" />
-
 ## Description + stats
 - A full-stack bank customer churn predictor application utilizing:
 
