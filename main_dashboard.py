@@ -201,7 +201,7 @@ def main():
         Avoid direct references to any specific figures, statistical terms, category names, probabilities, model, models, top 10 most important features, or technical jargon.Your output must be only the final explanation paragraph. Nothing else. Keep the explanation to under 4 sentences.
         """
         raw_response = client.chat.completions.create(
-            model='qwen/qwen3-32b',
+            model='openai/gpt-oss-120b',
             messages=[{"role": "user", "content": prompt}],
         )
         return clean_response(raw_response.choices[0].message.content)
@@ -237,7 +237,7 @@ def main():
         - Total length: 150-200 words
         """
         raw_response = client.chat.completions.create(
-            model="qwen/qwen3-32b",
+            model="openai/gpt-oss-120b",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7
         )
