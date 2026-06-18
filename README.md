@@ -16,7 +16,7 @@
 | XGBoost Classifier                   | 84.25%     |
 | XGBoost + SMOTE Classifier           | 83.87%     |
 | Voting Classifier                    | 83.63%     |
-| Qwen3 32B LLM [OpenAI]               | —          |
+| GPT OSS 120B LLM [OpenAI]               | —          |
 
 - It ingests <code>4000</code> entries to predict churn risk with visual insights, AI-generated explanations and emails.
 
