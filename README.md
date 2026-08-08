@@ -26,24 +26,26 @@
 | **Backend + DB** | ![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=black) ![EmailJS](https://img.shields.io/badge/EmailJS-FF9A00?style=for-the-badge&logo=mailboxdotorg&logoColor=black) ![JSON](https://img.shields.io/badge/-json-ccff00?style=for-the-badge&logo=json&logoColor=black) ![Cookie](https://img.shields.io/badge/-Cookie-d4aa00?style=for-the-badge&logo=cookiecutter&logoColor=black) |
 | **Other Libraries** |  ![NumPy](https://img.shields.io/badge/NumPy-7285A5?style=for-the-badge&logo=numpy&logoColor=black) ![Pandas](https://img.shields.io/badge/Pandas-A865B5?style=for-the-badge&logo=pandas&logoColor=black) ![SciPy](https://img.shields.io/badge/SciPy-8CAAE6?style=for-the-badge&logo=scipy&logoColor=black) ![Pillow](https://img.shields.io/badge/Pillow-D3D3D3?style=for-the-badge&logo=imagedotsc&logoColor=black) |
 
-## Database + authentication
-https://github.com/user-attachments/assets/9aea195d-7073-4813-9a08-3648790b84ce
-
 ## Quick Start
-1. Clone repo  
-2. ```
+1. Clone repo :
+   ```
+   git clone https://github.com/Soumilgit/XYZ-Bank-Customer-Churn-Predictor.git
+   ``` 
+3. Install required libraries :
+   ```
    pip install -r requirements.txt
    ```  
-3. Store below in a <ins>secrets.toml</ins> file under a <ins>.streamlit</ins> folder :
-```
-GROQ_API_KEY = ""
-SUPABASE_URL = ""
-SUPABASE_SERVICE_ROLE_KEY= ""
-EMAILJS_PUBLIC_KEY= ""
-EMAILJS_TEMPLATE_ID= ""
-EMAILJS_SERVICE_ID= ""
-```
-4. ```
+5. Store below in a <ins>secrets.toml</ins> file under a <ins>.streamlit</ins> folder :
+   ```
+   GROQ_API_KEY = ""
+   SUPABASE_URL = ""
+   SUPABASE_SERVICE_ROLE_KEY= ""
+   EMAILJS_PUBLIC_KEY= ""
+   EMAILJS_TEMPLATE_ID= ""
+   EMAILJS_SERVICE_ID= ""
+   ```
+4. Run the application :
+   ```
    streamlit run main.py
    ```
 
