@@ -186,7 +186,8 @@ def login_signup_interface():
             success, name = verify_login(email, password)
             if success:
                 ppa.login_user(email, name)
-                st.success(f"Welcome back, {name}!")
+                st.session_state["page"] = "Homepage"
+                st.query_params.page = "Homepage"
                 st.rerun()
             else:
                 st.error("Invalid email or password.")

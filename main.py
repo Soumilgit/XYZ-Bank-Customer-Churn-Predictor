@@ -1,7 +1,6 @@
 import base64
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 import Homepage
 import auth
@@ -118,7 +117,6 @@ except Exception:
 
 def set_page(target_page: str) -> None:
     st.session_state["page"] = target_page
-    st.session_state["collapse_sidebar_after_nav"] = True
     st.query_params.page = target_page
     st.rerun()
 
@@ -183,68 +181,3 @@ elif st.session_state["page"] == "Graphs":
 elif st.session_state["page"] == "Auth":
     auth.main()
 
-if st.session_state.get("collapse_sidebar_after_nav"):
-    components.html(
-        """
-        <script>
-        (function () {
-            const mq = window.parent.matchMedia('(max-width: 1024px)');
-            if (!mq.matches) return;
-
-            const doc = window.parent.document;
-            const sidebar = doc.querySelector('[data-testid="stSidebar"]');
-            if (!sidebar) return;
-
-            sidebar.setAttribute('aria-expanded', 'false');
-            sidebar.style.setProperty('transform', 'translateX(-270px)', 'important');
-        })();
-        </script>
-        """,
-        height=0,
-    )
-    del st.session_state["collapse_sidebar_after_nav"]
-
-# Restore mobile/tablet collapse behavior: fully retreat sidebar when collapsed.
-components.html(
-    """
-    <script>
-    (function () {
-        const mq = window.parent.matchMedia('(max-width: 1024px)');
-        const doc = window.parent.document;
-
-        function normalizeMobileSidebar() {
-            const sidebar = doc.querySelector('[data-testid="stSidebar"]');
-            if (!sidebar) return;
-
-            if (!mq.matches) {
-                sidebar.style.removeProperty('transform');
-                return;
-            }
-
-            const expanded = sidebar.getAttribute('aria-expanded') === 'true';
-            if (expanded) {
-                sidebar.style.setProperty('transform', 'translateX(0px)', 'important');
-            } else {
-                sidebar.style.setProperty('transform', 'translateX(-270px)', 'important');
-            }
-        }
-
-        normalizeMobileSidebar();
-
-        const sidebar = doc.querySelector('[data-testid="stSidebar"]');
-        if (sidebar) {
-            const observer = new MutationObserver(normalizeMobileSidebar);
-            observer.observe(sidebar, {
-                attributes: true,
-                attributeFilter: ['aria-expanded', 'style']
-            });
-        }
-
-        setTimeout(normalizeMobileSidebar, 80);
-        setTimeout(normalizeMobileSidebar, 200);
-        window.addEventListener('resize', normalizeMobileSidebar);
-    })();
-    </script>
-    """,
-    height=0,
-)
