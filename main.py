@@ -189,7 +189,7 @@ if st.session_state.pop("collapse_sidebar_after_navigation", False):
         <script>
         if (window.parent.matchMedia('(max-width: 1024px)').matches) {
             const collapseButton = window.parent.document.querySelector(
-                '[data-testid="stSidebarCollapseButton"]'
+                '[data-testid="stSidebarCollapseButton"] button'
             );
             if (collapseButton) collapseButton.click();
         }
