@@ -187,6 +187,7 @@ def login_signup_interface():
             if success:
                 ppa.login_user(email, name)
                 st.session_state["page"] = "Homepage"
+                st.session_state["collapse_sidebar_after_navigation"] = True
                 st.query_params.page = "Homepage"
                 st.rerun()
             else:

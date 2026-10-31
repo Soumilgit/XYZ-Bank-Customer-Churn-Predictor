@@ -1,6 +1,7 @@
 import base64
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 import Homepage
 import auth
@@ -117,6 +118,7 @@ except Exception:
 
 def set_page(target_page: str) -> None:
     st.session_state["page"] = target_page
+    st.session_state["collapse_sidebar_after_navigation"] = True
     st.query_params.page = target_page
     st.rerun()
 
@@ -180,4 +182,19 @@ elif st.session_state["page"] == "Graphs":
 
 elif st.session_state["page"] == "Auth":
     auth.main()
+
+if st.session_state.pop("collapse_sidebar_after_navigation", False):
+    components.html(
+        """
+        <script>
+        if (window.parent.matchMedia('(max-width: 1024px)').matches) {
+            const collapseButton = window.parent.document.querySelector(
+                '[data-testid="stSidebarCollapseButton"]'
+            );
+            if (collapseButton) collapseButton.click();
+        }
+        </script>
+        """,
+        height=0,
+    )
 
