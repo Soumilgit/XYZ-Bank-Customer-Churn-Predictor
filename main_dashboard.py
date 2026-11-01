@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import pickle
 import numpy as np
-from openai import OpenAI
+from openai import APIError, OpenAI, RateLimitError
 from dotenv import load_dotenv
 from scipy.stats import percentileofscore
 import utils as ut
@@ -275,15 +275,52 @@ def main():
         percentiles = calculate_percentiles(df, input_dfs_and_dict['dict'])
         avg_probability = make_predictions(input_dfs_and_dict, percentiles)
 
-        explanation = explain_prediction(avg_probability, input_dfs_and_dict['dict'], selected_surname)
+        try:
+            explanation = explain_prediction(
+                avg_probability, input_dfs_and_dict['dict'], selected_surname
+            )
+        except RateLimitError:
+            explanation = None
+            st.info(
+                "Your churn prediction is ready, but the AI service is busy. "
+                "The explanation is unavailable right now. We’ll still try "
+                "to draft the email using the customer details."
+            )
+        except APIError:
+            explanation = None
+            st.info(
+                "Your churn prediction is ready, but we couldn’t generate the "
+                "AI explanation. We’ll still try to draft the email using the "
+                "customer details."
+            )
+
         st.markdown("---")
         st.markdown("## Explanation of Prediction")
-        st.markdown(explanation)
+        if explanation:
+            st.markdown(explanation)
+        else:
+            st.caption("An AI-generated explanation isn’t available for this run.")
 
-        email = generate_email(input_dfs_and_dict['dict'], explanation, selected_surname)
         st.markdown("---")
         st.markdown("## Personalized Email")
-        st.markdown(email)
+        try:
+            email = generate_email(
+                input_dfs_and_dict['dict'],
+                explanation or "No AI explanation was available; use the customer details provided.",
+                selected_surname,
+            )
+            st.markdown(email)
+        except RateLimitError:
+            st.info(
+                "The prediction and explanation are ready, but the AI service "
+                "is busy and couldn’t draft the email. Please try again in a "
+                "few minutes."
+            )
+        except APIError:
+            st.info(
+                "The prediction and explanation are ready, but we couldn’t "
+                "draft the email right now. Please try again shortly."
+            )
 
 if __name__ == "__main__":
     main()
