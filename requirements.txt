@@ -1,6 +1,6 @@
 xgboost
 watchdog
-streamlit
+streamlit>=1.56,<2.0
 scikit-learn
 python-dotenv
 plotly

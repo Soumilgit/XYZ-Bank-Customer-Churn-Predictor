@@ -8,6 +8,7 @@ from scipy.stats import percentileofscore
 import utils as ut
 import re
 from sklearn.preprocessing import MinMaxScaler
+from walkthrough_ui import render_coachmark
 
 ut.apply_sidebar_styles()
 
@@ -244,11 +245,23 @@ def main():
         return clean_response(raw_response.choices[0].message.content)
 
     st.title("Bank Customer Churn Prediction")
+    def mark_customer_form_used():
+        if st.session_state.get("walkthrough_step") == "customer_form":
+            st.session_state["walkthrough_step"] = "customer_graphs"
+
+    if st.session_state.get("walkthrough_step") == "customer_form":
+        render_coachmark(
+            "Choose a customer",
+            "Choose a customer and adjust any details you need. Review the prediction below, then open the graphs from the sidebar.",
+            placement="bottom",
+        )
 
     df = pd.read_csv("churn.csv")
 
     customers = [f"{row['CustomerId']} - {row['Surname']}" for _, row in df.iterrows()]
-    selected_customer_option = st.selectbox("Customer selection", customers)
+    selected_customer_option = st.selectbox(
+        "Customer selection", customers, on_change=mark_customer_form_used
+    )
 
     if selected_customer_option:
         selected_customer_id = int(selected_customer_option.split(' - ')[0])
@@ -257,18 +270,18 @@ def main():
 
         col1, col2 = st.columns(2)
         with col1:
-            credit_score = st.number_input("Credit Score", min_value=300, max_value=850, value=selected_customer['CreditScore'])
-            location = st.selectbox("Location", ["Australia", "Japan", "USA"], index=["Australia", "Japan", "USA"].index(selected_customer["Geography"]))
-            gender = st.radio("Gender", ["Male", "Female"], index=0 if selected_customer["Gender"] == "Male" else 1)
-            age = st.number_input("Age", min_value=10, max_value=100, value=int(selected_customer["Age"]))
-            tenure = st.number_input("Tenure (years)", min_value=0, max_value=50, value=int(selected_customer["Tenure"]))
+            credit_score = st.number_input("Credit Score", min_value=300, max_value=850, value=selected_customer['CreditScore'], on_change=mark_customer_form_used)
+            location = st.selectbox("Location", ["Australia", "Japan", "USA"], index=["Australia", "Japan", "USA"].index(selected_customer["Geography"]), on_change=mark_customer_form_used)
+            gender = st.radio("Gender", ["Male", "Female"], index=0 if selected_customer["Gender"] == "Male" else 1, on_change=mark_customer_form_used)
+            age = st.number_input("Age", min_value=10, max_value=100, value=int(selected_customer["Age"]), on_change=mark_customer_form_used)
+            tenure = st.number_input("Tenure (years)", min_value=0, max_value=50, value=int(selected_customer["Tenure"]), on_change=mark_customer_form_used)
 
         with col2:
-            balance = st.number_input("Balance", min_value=0.0, value=float(selected_customer["Balance"]))
-            min_products = st.number_input("Number of Products", min_value=1, max_value=10, value=int(selected_customer['NumOfProducts']))
-            has_credit_card = st.checkbox("Has Credit Card", value=bool(selected_customer["HasCrCard"]))
-            is_active_member = st.checkbox("Is Active Member", value=bool(selected_customer["IsActiveMember"]))
-            estimated_salary = st.number_input("Estimated Salary", min_value=0.0, value=float(selected_customer["EstimatedSalary"]))
+            balance = st.number_input("Balance", min_value=0.0, value=float(selected_customer["Balance"]), on_change=mark_customer_form_used)
+            min_products = st.number_input("Number of Products", min_value=1, max_value=10, value=int(selected_customer['NumOfProducts']), on_change=mark_customer_form_used)
+            has_credit_card = st.checkbox("Has Credit Card", value=bool(selected_customer["HasCrCard"]), on_change=mark_customer_form_used)
+            is_active_member = st.checkbox("Is Active Member", value=bool(selected_customer["IsActiveMember"]), on_change=mark_customer_form_used)
+            estimated_salary = st.number_input("Estimated Salary", min_value=0.0, value=float(selected_customer["EstimatedSalary"]), on_change=mark_customer_form_used)
 
         input_dfs_and_dict = prepare_input(credit_score, location, gender, age, tenure, balance, min_products, has_credit_card, is_active_member, estimated_salary)
 

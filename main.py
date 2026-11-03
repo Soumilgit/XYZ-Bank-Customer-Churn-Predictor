@@ -1,7 +1,6 @@
 import base64
 
 import streamlit as st
-import streamlit.components.v1 as components
 
 import Homepage
 import auth
@@ -9,6 +8,7 @@ import graphs
 import main_dashboard as dashboard
 import pure_python_auth as ppa
 import utils as ut
+from walkthrough_ui import render_coachmark
 
 
 st.set_page_config(
@@ -90,6 +90,24 @@ elif "page" not in st.session_state:
 if st.session_state.get("page") not in ["Homepage", "Dashboard", "Graphs", "Auth"]:
     st.session_state["page"] = "Homepage"
 
+valid_walkthrough_steps = {
+    "account_access", "account_options", "customer_form",
+    "customer_graphs", "logout_tip", "complete",
+}
+if st.session_state.get("walkthrough_step") not in valid_walkthrough_steps:
+    if st.session_state["authenticated"]:
+        current_page = st.session_state["page"]
+        st.session_state["walkthrough_step"] = {
+            "Homepage": "customer_form",
+            "Graphs": "logout_tip",
+            "Dashboard": "customer_form",
+            "Auth": "complete",
+        }[current_page]
+    else:
+        st.session_state["walkthrough_step"] = (
+            "account_options" if st.session_state["page"] == "Auth" else "account_access"
+        )
+
 
 def add_sidebar_image(image_path: str) -> None:
     with open(image_path, "rb") as image_file:
@@ -128,17 +146,73 @@ if st.session_state["authenticated"]:
         set_page("Homepage")
     if st.sidebar.button("Analytical Main Dashboard Page", key="go_dashboard"):
         set_page("Dashboard")
+    if (
+        st.session_state.get("walkthrough_step") == "customer_form"
+        and st.session_state.get("page") != "Dashboard"
+    ):
+        render_coachmark(
+            "Start with the dashboard",
+            "Choose Analytical Main Dashboard Page to enter customer details and view the prediction.",
+            container=st.sidebar,
+            placement="sidebar",
+        )
+        render_coachmark(
+            "Open the sidebar",
+            "Tap the top-left chevrons, then choose Analytical Main Dashboard Page.",
+            placement="edge",
+        )
     if st.sidebar.button("Detailed Insight Visualizations", key="go_graphs"):
+        if st.session_state.get("walkthrough_step") == "customer_graphs":
+            st.session_state["walkthrough_step"] = "logout_tip"
         set_page("Graphs")
+    if st.session_state.get("walkthrough_step") == "customer_graphs":
+        render_coachmark(
+            "Next, explore customer graphs",
+            "Choose Detailed Insight Visualizations to compare customer trends after reviewing the prediction.",
+            container=st.sidebar,
+            placement="sidebar",
+        )
+        render_coachmark(
+            "Open the sidebar",
+            "Tap the top-left chevrons, then choose Detailed Insight Visualizations.",
+            placement="edge",
+        )
     if st.sidebar.button("Session Termination Process ", key="logout"):
+        st.session_state["walkthrough_step"] = "complete"
         ppa.logout_user()
         set_page("Auth")
+    if st.session_state.get("walkthrough_step") == "logout_tip":
+        render_coachmark(
+            "Finish your session",
+            "Your prediction and explanation are on this page. Choose Session Termination Process when you’re ready to log out.",
+            container=st.sidebar,
+            placement="sidebar",
+        )
+        render_coachmark(
+            "Open the sidebar",
+            "Tap the top-left chevrons, then choose Session Termination Process to log out.",
+            placement="edge",
+        )
     st.sidebar.markdown("</div>", unsafe_allow_html=True)
 else:
     if st.sidebar.button("Welcome & Introduction Portal", key="go_home_guest"):
         set_page("Homepage")
     if st.sidebar.button("Access & Registration Gateway", key="go_auth"):
+        if st.session_state.get("walkthrough_step") == "account_access":
+            st.session_state["walkthrough_step"] = "account_options"
         set_page("Auth")
+    if st.session_state.get("walkthrough_step") == "account_access":
+        render_coachmark(
+            "Log in or create an account",
+            "Choose this button to log in, sign up, or reset your password.",
+            container=st.sidebar,
+            placement="sidebar",
+        )
+        render_coachmark(
+            "Open the navigation",
+            "Tap the chevrons at the top-left to open the sidebar and find Log in or sign up.",
+            placement="edge",
+        )
     st.sidebar.markdown("</div>", unsafe_allow_html=True)
 
 if st.session_state.get("debug_mode", False):
@@ -147,29 +221,6 @@ if st.session_state.get("debug_mode", False):
     st.sidebar.write(f"Authenticated: {st.session_state.get('authenticated', False)}")
 
 if st.session_state["page"] == "Homepage":
-    if not st.session_state["authenticated"]:
-        st.markdown(
-            """
-            <div style="color: #856404; background-color: #fff3cd; border-left: 6px solid #ffeeba;
-            padding: 6px; border-radius: 4px; margin-bottom: 12px; font-size: 21px; width: 90%;">
-                ⚠️ Please log in to access the main dashboard.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        if "animated_hint_shown" not in st.session_state:
-            st.session_state["animated_hint_shown"] = True
-            st.markdown(
-                """
-                <div style="background-color: #f8d7da; color: #721c24; padding: 6px 8px;
-                border-radius: 6px; font-size: 21px; border-left: 6px solid #f5c6cb;
-                margin-bottom: 18px; width: 90%;">
-                    📢 <strong>Tap '>>' to access  mobile/tablet sidebar.</strong>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
     Homepage.main()
 
 elif st.session_state["page"] == "Dashboard":
@@ -184,7 +235,7 @@ elif st.session_state["page"] == "Auth":
     auth.main()
 
 if st.session_state.pop("collapse_sidebar_after_navigation", False):
-    components.html(
+    st.iframe(
         """
         <script>
         if (window.parent.matchMedia('(max-width: 1024px)').matches) {
@@ -195,6 +246,8 @@ if st.session_state.pop("collapse_sidebar_after_navigation", False):
         }
         </script>
         """,
-        height=0,
+        width=1,
+        height=1,
+        tab_index=-1,
     )
 
