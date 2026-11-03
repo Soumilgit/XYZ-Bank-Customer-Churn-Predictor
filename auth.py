@@ -6,6 +6,7 @@ import html
 from datetime import datetime
 from supabase import create_client
 import pure_python_auth as ppa
+from walkthrough_ui import render_coachmark
 try:
     import bcrypt
 except ImportError:
@@ -186,6 +187,7 @@ def login_signup_interface():
             success, name = verify_login(email, password)
             if success:
                 ppa.login_user(email, name)
+                st.session_state["walkthrough_step"] = "customer_form"
                 st.session_state["page"] = "Homepage"
                 st.session_state["collapse_sidebar_after_navigation"] = True
                 st.query_params.page = "Homepage"
@@ -216,44 +218,13 @@ def main():
     if st.session_state["authenticated"]:
         # Sanitize username to prevent XSS
         safe_username = html.escape(st.session_state.get('user', 'Unknown'))
-        
-        st.markdown(f"""
-        <div style="
-            color: #155724;
-            background-color: #d4edda;
-            border-left: 6px solid #c3e6cb;
-            padding: 14px 20px;
-            border-radius: 6px;
-            font-size: 26px;
-            margin-bottom: 12px;
-            font-weight: 500;">
-            🔓 Logged in as {safe_username}
-        </div>
-        """, unsafe_allow_html=True)
 
-        if "post_login_hint_shown" not in st.session_state:
-            st.session_state["post_login_hint_shown"] = True
-            st.markdown("""
-            <div class="zoom-box-login">
-                🚀 <strong>Tap '>>' to access sidebar on mobile.</strong>
-            </div>
-            <style>
-            .zoom-box-login {
-                background-color: #f8d7da;
-                color: #721c24;
-                padding: 14px 20px;
-                border-radius: 6px;
-                font-size: 26px;
-                border-left: 6px solid #f5c6cb;
-                margin-top: 10px;
-                margin-bottom: 24px;
-                animation: zoomIn 0.6s ease;
-            }
-            @keyframes zoomIn {
-                0% {opacity: 0; transform: scale(0.8);}
-                100% {opacity: 1; transform: scale(1);}
-            }
-            </style>
-            """, unsafe_allow_html=True)
+        st.caption(f"Logged in as {safe_username}.")
     else:
+        if st.session_state.get("walkthrough_step") == "account_options":
+            render_coachmark(
+                "Choose an account option",
+                "Use one of these tabs to log in, sign up, or reset your password.",
+                placement="bottom",
+            )
         login_signup_interface()

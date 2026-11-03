@@ -140,6 +140,7 @@ def main():
         }
         
         .main .block-container {
+            padding-top: 1.25rem !important;
             padding-bottom: 3rem !important;
         }
 
@@ -165,6 +166,8 @@ def main():
 
         st.markdown('<h1 class="title">Customer Analytics</h1>', unsafe_allow_html=True)
         st.markdown('<p class="subtitle">Advanced tools to know and keep customers.</p>', unsafe_allow_html=True)
+
+        is_authenticated = st.session_state.get("authenticated", False)
 
         st.markdown(
             """
@@ -207,30 +210,38 @@ def main():
         # Call-to-action text after the 4 boxes
         st.markdown('<p class="subtitle" style="margin-top: 1.35rem;">Uncover insights. Boost customer loyalty.</p>', unsafe_allow_html=True)
 
-        is_authenticated = st.session_state.get("authenticated", False)
-
         if is_authenticated:
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("🔄 Launch Churn Prediction Tool", key="churn_button", 
                         width='stretch'):
+                    st.session_state["walkthrough_step"] = "customer_form"
                     st.session_state.page = "Dashboard"
                     st.query_params.page = "Dashboard"
                     st.rerun()
             with col2:
                 if st.button("📈 Launch Graphs Dashboard", key="graphs_button",
                         width='stretch'):
+                    st.session_state["walkthrough_step"] = "logout_tip"
                     st.session_state.page = "Graphs"
                     st.query_params.page = "Graphs"
                     st.rerun()
         else:
             col1, col2 = st.columns(2)
             with col1:
-                st.button("🔒 Log in to access Churn Tool", disabled=True, 
-                        width='stretch')
+                if st.button("Log in or sign up to use Churn Tool", key="guest_churn_button",
+                        width='stretch'):
+                    st.session_state["walkthrough_step"] = "account_options"
+                    st.session_state.page = "Auth"
+                    st.query_params.page = "Auth"
+                    st.rerun()
             with col2:
-                st.button("🔒 Log in to access Churn Graphs", disabled=True,
-                        width='stretch')
+                if st.button("Log in or sign up to see Customer Graphs", key="guest_graphs_button",
+                        width='stretch'):
+                    st.session_state["walkthrough_step"] = "account_options"
+                    st.session_state.page = "Auth"
+                    st.query_params.page = "Auth"
+                    st.rerun()
 
     st.markdown("""
     <div class="footer">
