@@ -101,6 +101,7 @@ celerybeat.pid
 # Environments
 .env
 .streamlit/secrets.toml
+auth_data.json
 .venv
 env/
 venv/

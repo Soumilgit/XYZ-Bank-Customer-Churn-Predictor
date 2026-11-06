@@ -132,6 +132,10 @@ def render_coachmark(title, message, container=None, placement="bottom"):
                 margin: .35rem 0 .85rem;
             }
             .coachmark--sidebar { display: none; }
+            /* Hide the Streamlit slot too, so a hidden sidebar hint leaves no gap. */
+            div[data-testid="stElementContainer"]:has(.coachmark--sidebar) {
+                display: none !important;
+            }
             .coachmark--edge::before {
                 content: "";
                 position: absolute;
@@ -202,6 +206,7 @@ def render_coachmark(title, message, container=None, placement="bottom"):
             background: #1e293b !important;
         }
         </style>
+        <span class="coachmark-style-marker" aria-hidden="true"></span>
         """,
         unsafe_allow_html=True,
     )
@@ -221,6 +226,21 @@ def render_coachmark(title, message, container=None, placement="bottom"):
             const app = window.parent;
             const doc = app.document;
             const applyTheme = () => {
+                const mobile = app.matchMedia('(max-width: 1024px)').matches;
+                doc.querySelectorAll('.coachmark-style-marker').forEach((marker) => {
+                    const slot = marker.closest('[data-testid="stElementContainer"]');
+                    if (slot) slot.style.setProperty('display', 'none', 'important');
+                });
+                doc.querySelectorAll('.coachmark--sidebar').forEach((card) => {
+                    const slot = card.closest('[data-testid="stElementContainer"]');
+                    if (slot) {
+                        if (mobile) slot.style.setProperty('display', 'none', 'important');
+                        else slot.style.removeProperty('display');
+                    }
+                });
+                const helperSlot = window.frameElement?.closest('[data-testid="stElementContainer"]');
+                if (helperSlot) helperSlot.style.setProperty('display', 'none', 'important');
+
                 const nodes = [
                     doc.querySelector('[data-testid="stAppViewContainer"]'),
                     doc.querySelector('.stApp'),
@@ -258,6 +278,7 @@ def render_coachmark(title, message, container=None, placement="bottom"):
                 subtree: true,
                 attributeFilter: ['class', 'style', 'data-theme'],
             });
+            app.matchMedia('(max-width: 1024px)').addEventListener('change', applyTheme);
         })();
         </script>
         """,
