@@ -1,5 +1,7 @@
 # Bank Customer Churn Predictor
 
+[![XERJ Corpus Hub contributor](https://hub.xerj.org/contributors/Soumilgit/badge.svg)](https://hub.xerj.org/contributors/Soumilgit)
+
 ## Description + stats
 - A full-stack bank customer churn predictor application utilizing:
 
